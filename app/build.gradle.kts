@@ -62,6 +62,13 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    //Activity Result API
+    implementation("androidx.activity:activity-ktx:1.9.1")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -88,6 +95,10 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
+    //Logging Interceptor
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    //Plaid
+    implementation("com.plaid.link:sdk-core:4.6.0")
 
 }

@@ -7,6 +7,9 @@ import retrofit2.http.POST
 
 interface LinkTokenApi {
 
+//    @POST("/link/token/create")
+//    suspend fun getLinkToken(@Body requestBody: LinkTokenRequest): LinkTokenResponse
+
     @POST("/link/token/create")
-    suspend fun getLinkToken(@Body requestBody: LinkTokenRequest): LinkTokenResponse
+    suspend fun getLinkToken(): LinkTokenResponse
 }

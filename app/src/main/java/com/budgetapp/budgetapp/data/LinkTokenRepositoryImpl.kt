@@ -15,18 +15,18 @@ class LinkTokenRepositoryImpl @Inject constructor(
 ): LinkTokenRepository {
 
     override suspend fun getLinkToken(): Either<NetworkError, LinkTokenResponse> {
-        val requestBody = LinkTokenRequest(
-            android_package_name = "com.budgetapp.budgetapp",
-            client_id = "665e8bb2ac817b001bc809eb",
-            country_codes = arrayOf("US"),
-            language = "en",
-            products = arrayOf("auth"),
-            secret = "18b0093cfaeac720de940cbd7c0e28",
-            user = User(client_user_id = "user-id"),
-            client_name = "BudgetApp")
+//        val requestBody = LinkTokenRequest(
+//            android_package_name = "com.budgetapp.budgetapp",
+//            client_id = "665e8bb2ac817b001bc809eb",
+//            country_codes = arrayOf("US"),
+//            language = "en",
+//            products = arrayOf("auth"),
+//            secret = "18b0093cfaeac720de940cbd7c0e28",
+//            user = User(client_user_id = "user-id"),
+//            client_name = "BudgetApp")
 
         return Either.catch {
-            linkTokenApi.getLinkToken(requestBody)
+            linkTokenApi.getLinkToken()
         }.mapLeft { it.toNetworkError()}
     }
 }

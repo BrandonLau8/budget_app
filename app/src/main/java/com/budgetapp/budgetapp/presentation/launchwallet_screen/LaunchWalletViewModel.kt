@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.budgetapp.budgetapp.domain.respository.LinkTokenRepository
 import com.budgetapp.budgetapp.presentation.util.sendEvent
 import com.budgetapp.budgetapp.util.Event
+import com.plaid.link.linkTokenConfiguration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,21 +47,22 @@ class LaunchWalletViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             buttonText = "Token: ${response.link_token}",
-                            isButtonEnabled = true
+                            isButtonEnabled = true,
+                            linkToken = response.link_token
                         )
                     }
                     Log.d("test", "getLinkToken: ${response.link_token}")
+                    initializePlaidLink(response.link_token)
                 }
             )
             _state.update {
                 it.copy(isLoading = false)
             }
-//           try {
-//               val token = linkTokenRepository.getLinkToken()
-//               _state.update { it.copy(isLoading = false, buttonText = "Token: $token", isButtonEnabled = true) }
-//           } catch (e:Exception) {
-//               _state.update { it.copy(isLoading = false, error = "Failed", isButtonEnabled = true) }
-//           }
+        }
+        }
+    private fun initializePlaidLink(linkToken: String) {
+        val linkConfiguration = linkTokenConfiguration {
+            token = linkToken
         }
     }
 }
