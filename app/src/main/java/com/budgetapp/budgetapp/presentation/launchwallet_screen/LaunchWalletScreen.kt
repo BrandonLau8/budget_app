@@ -1,13 +1,7 @@
 package com.budgetapp.budgetapp.presentation.launchwallet_screen
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.Application
-import android.content.Context
-import android.content.Intent
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,67 +14,55 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import com.budgetapp.budgetapp.presentation.plaidlink_screen.PlaidLinkScreen
+import androidx.navigation.NavHostController
+import com.budgetapp.budgetapp.presentation.util.components.PlaidLinkButton
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
-import com.plaid.link.Plaid
-import com.plaid.link.PlaidHandler
-import com.plaid.link.linkTokenConfiguration
 
 @Composable
 //internal encapsulates within module
 internal fun LaunchWalletScreen(
     viewModel: LaunchWalletViewModel = hiltViewModel(),
-    activity: ComponentActivity
-
+    activity: ComponentActivity,
+    navController: NavHostController
 ) {
 
-    //Collects stream of data ('StateFlow') into a state only when Composable is active(on-screen)
-    val viewState by viewModel.state.collectAsStateWithLifecycle()
+//    Collects stream of data ('StateFlow') into a state only when Composable is active(on-screen)
+    val viewState by viewModel.linkTokenState.collectAsStateWithLifecycle()
 
+
+    // Function to create PlaidLinkButton
+    val plaidLinkButton: @Composable () -> Unit = {
+        viewState.linkToken?.let { token ->
+            PlaidLinkButton(
+                token = token,
+                activity = activity,
+                navController = navController
+            )
+        }
+    }
 
     LaunchWalletContent(
         viewState = viewState,
         onButtonClick = {
-            viewModel.getLinkToken() })
+            viewModel.getLinkToken()
+        },
+        plaidLinkButton = plaidLinkButton
+    )
 
-    if(viewState.linkToken != null) {
-
-        PlaidLinkScreen(
-            token = viewState.linkToken!!,
-            activity = activity
-            )
-    }
-
-
-
-//    LaunchWalletContent(
-//        viewState = viewState,
-//        onButtonClick = {
-//            viewModel.getLinkToken()
-//            // Launch PlaidLinkActivity
-//            val token = viewState.linkToken // Assume viewState contains the token
-//            val intent = Intent(context, PlaidLinkActivity::class.java).apply {
-//                putExtra("LINK_TOKEN", token)
-//            }
-//            context.startActivity(intent)
-//        }
-//    )
 }
 
 @Composable
 fun LaunchWalletContent(
-    viewState: LaunchWalletViewState,
+    viewState: LinkTokenState,
     onButtonClick: () -> Unit,
+    plaidLinkButton: (@Composable () -> Unit)? = null
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -88,19 +70,28 @@ fun LaunchWalletContent(
     ) {
 
         Column(
-            modifier = Modifier.padding(it.calculateTopPadding()),
+            modifier = Modifier
+                .padding(it.calculateTopPadding()),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (viewState.isLoading) {
                 CircularProgressIndicator()
             } else {
-                Button(
-                    onClick = onButtonClick,
-                    enabled = viewState.isButtonEnabled
-                ) {
-                    Text(viewState.buttonText)
-                }
+                    Button(
+                        onClick = onButtonClick,
+                        enabled = viewState.isButtonEnabled,
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .background(Color.Red) // For testing
+                    ) {
+                        Text(viewState.buttonText)
+                    }
+
+               if(viewState.linkToken != null) {
+                   // Display the PlaidLinkButton if provided
+                   plaidLinkButton?.invoke()
+               }
 
                 viewState.error?.let {
                     Spacer(modifier = Modifier.height(16.dp))

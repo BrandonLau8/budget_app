@@ -23,7 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.budgetapp.budgetapp.presentation.launchwallet_screen.LaunchWalletScreen
-import com.budgetapp.budgetapp.presentation.plaidlink_screen.PlaidLinkScreen
+import com.budgetapp.budgetapp.ui.navigation.MainActivityContent
 import com.budgetapp.budgetapp.ui.theme.BudgetAppTheme
 import com.budgetapp.budgetapp.util.Event
 import com.budgetapp.budgetapp.util.EventBus
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     
-                    LaunchWalletScreen(activity = this)
+                    MainActivityContent(activity = this)
                 }
             }
         }
