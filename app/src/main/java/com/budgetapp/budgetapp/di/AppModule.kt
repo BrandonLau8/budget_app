@@ -1,6 +1,6 @@
 package com.budgetapp.budgetapp.di
 
-import com.budgetapp.budgetapp.data.remote.LinkTokenApi
+import com.budgetapp.budgetapp.data.remote.TokenApi
 import com.budgetapp.budgetapp.util.Constant.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -43,7 +43,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideLinkTokenApi(retrofit: Retrofit): LinkTokenApi {
-        return retrofit.create(LinkTokenApi::class.java)
+    fun provideLinkTokenApi(retrofit: Retrofit): TokenApi {
+        return retrofit.create(TokenApi::class.java)
     }
 }

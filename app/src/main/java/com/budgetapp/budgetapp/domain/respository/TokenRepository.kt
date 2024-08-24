@@ -1,9 +1,13 @@
 package com.budgetapp.budgetapp.domain.respository
 
 import arrow.core.Either
+
 import com.budgetapp.budgetapp.domain.model.LinkTokenResponse
 import com.budgetapp.budgetapp.domain.model.NetworkError
+import com.budgetapp.budgetapp.domain.model.PublicTokenResponse
 
-interface LinkTokenRepository {
+interface TokenRepository {
     suspend fun getLinkToken(): Either<NetworkError, LinkTokenResponse>
+
+    suspend fun exchangePublicToken(publicToken:String): Either<NetworkError, PublicTokenResponse>
 }

@@ -1,7 +1,7 @@
 package com.budgetapp.budgetapp.di
 
-import com.budgetapp.budgetapp.data.LinkTokenRepositoryImpl
-import com.budgetapp.budgetapp.domain.respository.LinkTokenRepository
+import com.budgetapp.budgetapp.data.TokenRepositoryImpl
+import com.budgetapp.budgetapp.domain.respository.TokenRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,5 +13,5 @@ import javax.inject.Singleton
 abstract class RepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindLinkTokenRepository(impl: LinkTokenRepositoryImpl): LinkTokenRepository
+    abstract fun bindLinkTokenRepository(impl: TokenRepositoryImpl): TokenRepository
 }

@@ -19,7 +19,7 @@ fun AppNavigation(navController: NavHostController, activity: ComponentActivity)
         }
 
         composable("accessScreen") {
-            AccessScreen()
+            AccessScreen(navController = navController)
         }
     }
 }

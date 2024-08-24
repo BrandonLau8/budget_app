@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.budgetapp.budgetapp.presentation.access_screen.AccessViewModel
 import com.budgetapp.budgetapp.presentation.util.components.PlaidLinkButton
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 
@@ -30,7 +31,8 @@ import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 internal fun LaunchWalletScreen(
     viewModel: LaunchWalletViewModel = hiltViewModel(),
     activity: ComponentActivity,
-    navController: NavHostController
+    navController: NavHostController,
+    accessViewModel: AccessViewModel = hiltViewModel()
 ) {
 
 //    Collects stream of data ('StateFlow') into a state only when Composable is active(on-screen)
@@ -43,7 +45,9 @@ internal fun LaunchWalletScreen(
             PlaidLinkButton(
                 token = token,
                 activity = activity,
-                navController = navController
+                navController = navController,
+                viewModel = accessViewModel
+
             )
         }
     }
