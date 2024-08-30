@@ -2,6 +2,7 @@ package com.budgetapp.budgetapp.data.remote
 
 
 
+import com.budgetapp.budgetapp.domain.model.CreatePublicTokenResponse
 import com.budgetapp.budgetapp.domain.model.LinkTokenResponse
 import com.budgetapp.budgetapp.domain.model.PublicTokenResponse
 import retrofit2.http.Body
@@ -13,6 +14,9 @@ interface TokenApi {
     //suspend used to perform async functions
     @POST("/link/token/create")
     suspend fun getLinkToken(): LinkTokenResponse
+
+    @POST("/sandbox/public_token/create")
+    suspend fun createPublicToken(): CreatePublicTokenResponse
 
     @POST("/item/public_token/exchange")
     suspend fun exchangePublicToken(@Query("public_token") publicToken:String): PublicTokenResponse

@@ -71,11 +71,12 @@ fun LaunchWalletContent(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { MyTopAppBar(title = "Budgeting App") }
-    ) {
+    ) {paddingValues ->
 
         Column(
             modifier = Modifier
-                .padding(it.calculateTopPadding()),
+                .fillMaxSize()
+                .padding(paddingValues),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -87,7 +88,6 @@ fun LaunchWalletContent(
                         enabled = viewState.isButtonEnabled,
                         modifier = Modifier
                             .padding(bottom = 8.dp)
-                            .background(Color.Red) // For testing
                     ) {
                         Text(viewState.buttonText)
                     }
@@ -99,7 +99,7 @@ fun LaunchWalletContent(
 
                 viewState.error?.let {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = it, color = Color.Red)
+                    Text(text = it)
 
                 }
             }

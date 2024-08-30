@@ -55,15 +55,18 @@ fun PlaidLinkButton(
 //                viewModel.getPublicToken(result.publicToken)
                 viewModel.exchangePublicToken(result.publicToken)
 
-                    if (viewModel.accessViewState != null) {
-                        Log.d("AccessScreen", "Navigating to accessScreen")
-                        navController.navigate("accessScreen")
-                    }
+
+                if (viewModel.accessViewState != null) {
+                    Log.d("AccessScreen", "Navigating to accessScreen")
+                    navController.navigate("accessScreen")
+                }
 
             }
             is LinkExit -> handleLinkExit(result)
         }
     }
+
+    val result =
 
 
 

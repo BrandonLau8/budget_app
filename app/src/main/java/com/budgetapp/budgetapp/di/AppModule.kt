@@ -1,6 +1,8 @@
 package com.budgetapp.budgetapp.di
 
+import android.view.SurfaceControl.Transaction
 import com.budgetapp.budgetapp.data.remote.TokenApi
+import com.budgetapp.budgetapp.data.remote.TransactionApi
 import com.budgetapp.budgetapp.util.Constant.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -46,4 +48,12 @@ object AppModule {
     fun provideLinkTokenApi(retrofit: Retrofit): TokenApi {
         return retrofit.create(TokenApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideTransactionApi(retrofit: Retrofit): TransactionApi {
+        return retrofit.create(TransactionApi::class.java)
+    }
+
+
 }
