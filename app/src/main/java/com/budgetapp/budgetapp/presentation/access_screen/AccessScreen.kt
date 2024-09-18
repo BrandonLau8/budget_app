@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import arrow.core.left
 import com.budgetapp.budgetapp.domain.model.transaction.Transaction
-import com.budgetapp.budgetapp.domain.model.transaction.TransactionResponse
+import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 
 
@@ -49,6 +49,8 @@ internal fun AccessScreen(
     navController: NavController,
     viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
 ) {
+
+    // used to observe and collect state from the viewmodel. convert into format ('State
     val viewState by viewModel.accessViewState.collectAsStateWithLifecycle()
     val checkedStates by viewModel.checkedStates.collectAsStateWithLifecycle()
     val totalSum by viewModel.totalSum.collectAsStateWithLifecycle()
@@ -58,10 +60,10 @@ internal fun AccessScreen(
 //        Log.d("test","Access Token: ${viewState.accessToken}")
 //    }
 //
+
+
     when (viewState) {
         is AccessViewState.TransactionViewState -> {
-
-
             AccessContent(
                 transactions = (viewState as AccessViewState.TransactionViewState).transactions,
                 checkedStates = checkedStates,
@@ -91,7 +93,7 @@ internal fun AccessScreen(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AccessContent(
-    transactions: TransactionResponse,
+    transactions: TransactionsSyncResponse,
     checkedStates: Map<Transaction, Boolean>,
     onCheckedChange: (Transaction, Boolean) -> Unit,
     totalSum: Double,

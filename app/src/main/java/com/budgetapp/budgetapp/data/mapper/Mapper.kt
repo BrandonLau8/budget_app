@@ -5,6 +5,7 @@ import com.budgetapp.budgetapp.domain.model.NetworkError
 import retrofit2.HttpException
 import java.io.IOException
 
+//extension function allows you to add functions to existing class
 fun Throwable.toNetworkError(): NetworkError{
     val error = when(this) {
         is IOException -> ApiError.NetworkError

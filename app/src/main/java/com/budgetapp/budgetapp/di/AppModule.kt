@@ -4,6 +4,9 @@ import android.view.SurfaceControl.Transaction
 import com.budgetapp.budgetapp.data.remote.TokenApi
 import com.budgetapp.budgetapp.data.remote.TransactionApi
 import com.budgetapp.budgetapp.util.Constant.BASE_URL
+import com.budgetapp.budgetapp.util.LocalDateAdapter
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,12 +15,14 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDate
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 object AppModule {
 
+    //used to log HTTP req and res
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
@@ -26,6 +31,7 @@ object AppModule {
         }
     }
 
+    //handles the actual network communication
     @Provides
     @Singleton
     fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
@@ -33,13 +39,18 @@ object AppModule {
             .addInterceptor(loggingInterceptor)
             .build()
     }
+
+    //simplifies api calls. user convertors to automatically serialize and deserialize json or xml data
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val gson: Gson = GsonBuilder()
+            .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter)
+            .create()
         return Retrofit.Builder()
             .baseUrl(BASE_URL) // Replace with your base URL
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 

@@ -41,15 +41,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
-
+        enableEdgeToEdge() //allows app to extend past status and navigation bar on screen
         setContent {
             BudgetAppTheme {
+
+                //Ensuring that coroutines and other asynchronous tasks are appropriately started and stopped based on the lifecycle state.
                 val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-                LaunchedEffect(key1 = lifecycle) {
+                //Used to launch coroutines within the scope of a composable
+                LaunchedEffect(key1 = lifecycle) {//runs everytime lifecycle object changes but that is rare for lifecycle
+
+                    //ensure that the collect operation only runs when the composable's lifecycle is in the 'STARTED' state
                     repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+
                         EventBus.events.collect { event ->
                             if (event is Event.Toast) {
                                 Toast.makeText(this@MainActivity, event.message, Toast.LENGTH_SHORT)
@@ -58,11 +62,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    
                     MainActivityContent(activity = this)
                 }
             }

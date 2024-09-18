@@ -10,9 +10,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
+@Module //marks class as a dagger module
+@InstallIn(SingletonComponent::class) //the provided dependencies will have a singleton scope, lasting the entire lifecycle of the app
+abstract class RepositoryModule { //module that provides di for repository classes
     @Binds
     @Singleton
     abstract fun bindLinkTokenRepository(impl: TokenRepositoryImpl): TokenRepository

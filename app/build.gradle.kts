@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.places)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

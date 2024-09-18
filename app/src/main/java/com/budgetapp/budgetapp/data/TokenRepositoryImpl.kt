@@ -15,10 +15,12 @@ class TokenRepositoryImpl @Inject constructor(
 ): TokenRepository {
 
     override suspend fun getLinkToken(): Either<NetworkError, LinkTokenResponse> {
+        //if an exception occurs while calling tokenApi.getLinkToken(), it will be transformed into a NetworkError using the toNetworkError() extension function.
         return Either.catch {
             tokenApi.getLinkToken()
         }.mapLeft { it.toNetworkError()}
     }
+
 
     override suspend fun createPublicToken(): Either<NetworkError, CreatePublicTokenResponse> {
         return Either.catch {
