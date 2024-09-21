@@ -23,7 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.room.Room
-import com.budgetapp.budgetapp.data.database.AppDatabase
+import com.budgetapp.budgetapp.data.database.BudgetDatabase
 import com.budgetapp.budgetapp.presentation.launchwallet_screen.LaunchWalletScreen
 import com.budgetapp.budgetapp.ui.navigation.MainActivityContent
 import com.budgetapp.budgetapp.ui.theme.BudgetAppTheme
@@ -40,18 +40,18 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // Initialize Room database as a late-initialized variable
-    private lateinit var database: AppDatabase
+//    // Initialize Room database as a late-initialized variable
+//    private lateinit var database: BudgetDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //Room database intialization
-        database = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "budget_database"
-        ).build()
+//        //Room database intialization
+//        database = Room.databaseBuilder(
+//            applicationContext,
+//            BudgetDatabase::class.java,
+//            "budget_database"
+//        ).build()
 
         enableEdgeToEdge() //allows app to extend past status and navigation bar on screen
         setContent {

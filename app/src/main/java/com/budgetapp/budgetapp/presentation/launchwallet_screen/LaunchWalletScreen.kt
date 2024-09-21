@@ -57,7 +57,8 @@ internal fun LaunchWalletScreen(
         onButtonClick = {
             viewModel.getLinkToken()
         },
-        plaidLinkButton = plaidLinkButton
+        plaidLinkButton = plaidLinkButton,
+        toBudgetScreen = {navController.navigate("budgetScreen")}
     )
 
 }
@@ -66,11 +67,14 @@ internal fun LaunchWalletScreen(
 fun LaunchWalletContent(
     viewState: LinkTokenState,
     onButtonClick: () -> Unit,
+    toBudgetScreen: () -> Unit,
     plaidLinkButton: (@Composable () -> Unit)? = null
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { MyTopAppBar(title = "Budgeting App") }
+        topBar = { MyTopAppBar(
+            title = "Budgeting App",
+            toBudgetScreen = toBudgetScreen) }
     ) {paddingValues ->
 
         Column(

@@ -1,7 +1,11 @@
 package com.budgetapp.budgetapp.di
 
+import com.budgetapp.budgetapp.data.BudgetRepository
+import com.budgetapp.budgetapp.data.BudgetRepositoryImpl
 import com.budgetapp.budgetapp.data.TokenRepositoryImpl
 import com.budgetapp.budgetapp.data.TransactionRepositoryImpl
+import com.budgetapp.budgetapp.data.dao.BudgetDao
+import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 import com.budgetapp.budgetapp.domain.respository.TokenRepository
 import com.budgetapp.budgetapp.domain.respository.TransactionRepository
 import dagger.Binds
@@ -20,4 +24,8 @@ abstract class RepositoryModule { //module that provides di for repository class
     @Binds
     @Singleton
     abstract fun bindTransactionRepository(impl: TransactionRepositoryImpl): TransactionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBudgetRepository(impl: BudgetRepositoryImpl): BudgetRepository
 }

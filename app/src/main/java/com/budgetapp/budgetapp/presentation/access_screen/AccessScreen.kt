@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,12 +43,14 @@ import arrow.core.left
 import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
-
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun AccessScreen(
     navController: NavController,
     viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
+
 ) {
 
     // used to observe and collect state from the viewmodel. convert into format ('State
@@ -75,7 +78,8 @@ internal fun AccessScreen(
 
                 onUncheckAllClick = {
                     viewModel.uncheckAllTransactions() // Call the function to uncheck all
-                }
+                },
+                toBudgetScreen = {navController.navigate("budgetScreen")}
             )
         }
 
@@ -89,6 +93,45 @@ internal fun AccessScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewAccessScreen() {
+
+    // Example date string
+    val dateString = "2024-05-10"
+
+    // Specify the format of the date string
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    // Parse the string to LocalDate
+    val localDate = LocalDate.parse(dateString, formatter)
+
+    // Pass dummy values for previewing
+    val dummyTransactions = TransactionsSyncResponse(
+        added = listOf(
+            Transaction(100.0, "USD", localDate, "Sample Transaction 1"),
+            Transaction( 50.0, "USD", localDate, "Sample Transaction 2")
+        )
+    )
+    val checkedStates = mapOf(
+        dummyTransactions.added[0] to true,
+        dummyTransactions.added[1] to false
+    )
+    val totalSum = 100.0
+
+    // Render AccessContent with dummy data
+    AccessContent(
+        transactions = dummyTransactions,
+        checkedStates = checkedStates,
+        onCheckedChange = { _, _ -> },
+        totalSum = totalSum,
+        modifier = Modifier.fillMaxSize(),
+        onUncheckAllClick = {},
+        toBudgetScreen = {}
+    )
+}
+
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -99,12 +142,17 @@ fun AccessContent(
     totalSum: Double,
     modifier: Modifier,
     onUncheckAllClick: () -> Unit, // Add this parameter
+    toBudgetScreen: () -> Unit
 ) {
 
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { MyTopAppBar(title = "Budgeting App") }
+        topBar = { MyTopAppBar(
+            title = "Budgeting App",
+            toBudgetScreen = toBudgetScreen
+
+        ) }
     ) { paddingValues ->
 
         val topPadding = paddingValues.calculateTopPadding()

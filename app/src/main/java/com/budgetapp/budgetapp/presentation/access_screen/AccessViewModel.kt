@@ -42,6 +42,8 @@ class AccessViewModel @Inject constructor(
     private val _checkedStates = MutableStateFlow<Map<Transaction, Boolean>>(emptyMap())
     val checkedStates: StateFlow<Map<Transaction, Boolean>> = _checkedStates.asStateFlow() //type is explicitlly provided since it is managing a complex data structure (map)
 
+
+
     // Derived state to calculate the total sum of checked transactions
     val totalSum: StateFlow<Double> = _checkedStates
         .map { checkedStates ->
