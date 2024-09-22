@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,7 +52,7 @@ internal fun AccessScreen(
     navController: NavController,
     viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
 
-) {
+    ) {
 
     // used to observe and collect state from the viewmodel. convert into format ('State
     val viewState by viewModel.accessViewState.collectAsStateWithLifecycle()
@@ -79,7 +80,8 @@ internal fun AccessScreen(
                 onUncheckAllClick = {
                     viewModel.uncheckAllTransactions() // Call the function to uncheck all
                 },
-                toBudgetScreen = {navController.navigate("budgetScreen")}
+                toBudgetScreen = { navController.navigate("budgetScreen") },
+                toLaunchScreen = { navController.navigate("launchWallet") }
             )
         }
 
@@ -110,7 +112,7 @@ fun PreviewAccessScreen() {
     val dummyTransactions = TransactionsSyncResponse(
         added = listOf(
             Transaction(100.0, "USD", localDate, "Sample Transaction 1"),
-            Transaction( 50.0, "USD", localDate, "Sample Transaction 2")
+            Transaction(50.0, "USD", localDate, "Sample Transaction 2")
         )
     )
     val checkedStates = mapOf(
@@ -127,10 +129,10 @@ fun PreviewAccessScreen() {
         totalSum = totalSum,
         modifier = Modifier.fillMaxSize(),
         onUncheckAllClick = {},
-        toBudgetScreen = {}
+        toBudgetScreen = {},
+        toLaunchScreen = {},
     )
 }
-
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -142,27 +144,37 @@ fun AccessContent(
     totalSum: Double,
     modifier: Modifier,
     onUncheckAllClick: () -> Unit, // Add this parameter
-    toBudgetScreen: () -> Unit
+    toBudgetScreen: () -> Unit,
+    toLaunchScreen: () -> Unit,
 ) {
 
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { MyTopAppBar(
-            title = "Budgeting App",
-            toBudgetScreen = toBudgetScreen
+        topBar = {
+            MyTopAppBar(
+                title = "Budgeting App",
+                toBudgetScreen = toBudgetScreen,
+                toLaunchScreen = toLaunchScreen
 
-        ) }
+            )
+        }
     ) { paddingValues ->
 
         val topPadding = paddingValues.calculateTopPadding()
 
-        Column(modifier = Modifier
-            .padding(paddingValues)) {
-            Row(
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                NumberContainer(number = totalSum, modifier = Modifier.padding(5.dp), onUncheckAllClick = onUncheckAllClick)
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            Row {
+//                NumberContainer(
+//                    number = totalSum,
+//                    modifier = Modifier.padding(5.dp),
+//                    onUncheckAllClick = onUncheckAllClick
+//                )
+
+                BoxScope
             }
 
 
@@ -253,71 +265,89 @@ fun NumberContainer(
         }
     }
 
-    Surface(
-        modifier = modifier
-            .size(200.dp) // Set the size of the container
-            .padding(16.dp) // Padding inside the container
-        .clickable { onUncheckAllClick() }, // Make Surface clickable
-        shape = RoundedCornerShape(8.dp), // Rounded corners
-        color = Color(0xFFFFCDD2), // Background color of the container
-    ) {
-        // Add the button to uncheck all checkboxes
-        Box(
-            contentAlignment = Alignment.Center // Center the content inside the container
-
+    Column {
+        Surface(
+            modifier = modifier
+                .size(200.dp) // Set the size of the container
+                .padding(16.dp) // Padding inside the container
+                .clickable { onUncheckAllClick() }, // Make Surface clickable
+            shape = RoundedCornerShape(8.dp), // Rounded corners
+            color = Color(0xFFFFCDD2), // Background color of the container
         ) {
+            // Add the button to uncheck all checkboxes
+            Box(
+                contentAlignment = Alignment.Center // Center the content inside the container
+            ) {
 
                 Text(
                     text = "Uncheck All", // Text for the clickable surface
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.Black
                 )
-
-
+            }
         }
-    }
-
-}
-
-
-@Composable
-fun ListItem(
-    headlineContent: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-    overlineContent: (@Composable () -> Unit)? = null,
-    supportingContent: (@Composable () -> Unit)? = null,
-    leadingContent: (@Composable () -> Unit)? = null,
-    trailingContent: (@Composable () -> Unit)? = null,
-    colors: ListItemColors = ListItemDefaults.colors(),
-    tonalElevation: Dp = ListItemDefaults.Elevation,
-    shadowElevation: Dp = ListItemDefaults.Elevation,
-    checkboxState: Boolean = false, // Add checkboxState parameter
-    onCheckboxCheckedChange: (Boolean) -> Unit = {}, // Callback for checkbox state change
-) {
-    Row(
-        modifier = modifier
-            .padding(8.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(color = colors.containerColor.copy(alpha = 0.1f))
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .shadow(tonalElevation, RoundedCornerShape(4.dp))
-    ) {
-        leadingContent?.invoke()
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = if (leadingContent != null) 16.dp else 0.dp)
+        Surface(
+            modifier = modifier
+                .size(200.dp) // Set the size of the container
+                .padding(16.dp) // Padding inside the container
+                .clickable { onUncheckAllClick() }, // Make Surface clickable
+            shape = RoundedCornerShape(8.dp), // Rounded corners
+            color = Color(0xFFFFCDD2), // Background color of the container
         ) {
-            overlineContent?.invoke()
-            headlineContent()
-            supportingContent?.invoke()
+            // Add the button to uncheck all checkboxes
+            Box(
+                contentAlignment = Alignment.Center // Center the content inside the container
+            ) {
+
+                Text(
+                    text = "Uncheck All", // Text for the clickable surface
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+            }
         }
-        trailingContent?.invoke()
-        Checkbox(
-            checked = checkboxState,
-            onCheckedChange = onCheckboxCheckedChange
-        )
     }
-}
+    }
+
+
+    @Composable
+    fun ListItem(
+        headlineContent: @Composable () -> Unit,
+        modifier: Modifier = Modifier,
+        overlineContent: (@Composable () -> Unit)? = null,
+        supportingContent: (@Composable () -> Unit)? = null,
+        leadingContent: (@Composable () -> Unit)? = null,
+        trailingContent: (@Composable () -> Unit)? = null,
+        colors: ListItemColors = ListItemDefaults.colors(),
+        tonalElevation: Dp = ListItemDefaults.Elevation,
+        shadowElevation: Dp = ListItemDefaults.Elevation,
+        checkboxState: Boolean = false, // Add checkboxState parameter
+        onCheckboxCheckedChange: (Boolean) -> Unit = {}, // Callback for checkbox state change
+    ) {
+        Row(
+            modifier = modifier
+                .padding(8.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = colors.containerColor.copy(alpha = 0.1f))
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .shadow(tonalElevation, RoundedCornerShape(4.dp))
+        ) {
+            leadingContent?.invoke()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = if (leadingContent != null) 16.dp else 0.dp)
+            ) {
+                overlineContent?.invoke()
+                headlineContent()
+                supportingContent?.invoke()
+            }
+            trailingContent?.invoke()
+            Checkbox(
+                checked = checkboxState,
+                onCheckedChange = onCheckboxCheckedChange
+            )
+        }
+    }
 
 

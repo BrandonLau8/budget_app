@@ -1,9 +1,12 @@
 package com.budgetapp.budgetapp.presentation.budget_screen
 
-import com.budgetapp.budgetapp.domain.model.savedbudget.SavedBudgets
+import androidx.compose.runtime.Stable
+import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 
+
+@Stable
 sealed interface BudgetViewState {
-    data class SavedBudgetViewState(val savedBudgets: SavedBudgets): BudgetViewState
+    data class SavedBudgetViewState(val budgetItems: List<BudgetItem> = emptyList()): BudgetViewState
 
     //object creates singleton class
     object Error: BudgetViewState

@@ -1,6 +1,8 @@
 package com.budgetapp.budgetapp.presentation.util.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,10 +19,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun MyTopAppBar(
     title: String,
-    toBudgetScreen: () -> Unit
+    toBudgetScreen: () -> Unit,
+    toLaunchScreen:() -> Unit
 ) {
     TopAppBar(
         title = { Text(text = title) },
+        navigationIcon = { Button(onClick = { toLaunchScreen()}) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
+        }},
         actions = { Button(onClick = {toBudgetScreen()}) {
             Icon(imageVector = Icons.Filled.Menu, contentDescription = "Budget")
         }},
@@ -32,6 +38,7 @@ fun MyTopAppBar(
 fun MyTopAppBarPreview() {
     MyTopAppBar(
         title = "Budget App",
-        toBudgetScreen = {}
+        toBudgetScreen = {},
+        toLaunchScreen = {},
     )
 }

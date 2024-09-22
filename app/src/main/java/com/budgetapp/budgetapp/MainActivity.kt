@@ -40,18 +40,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-//    // Initialize Room database as a late-initialized variable
-//    private lateinit var database: BudgetDatabase
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        //Room database intialization
-//        database = Room.databaseBuilder(
-//            applicationContext,
-//            BudgetDatabase::class.java,
-//            "budget_database"
-//        ).build()
 
         enableEdgeToEdge() //allows app to extend past status and navigation bar on screen
         setContent {
@@ -62,6 +52,8 @@ class MainActivity : ComponentActivity() {
 
                 //Used to launch coroutines within the scope of a composable
                 LaunchedEffect(key1 = lifecycle) {//runs everytime lifecycle object changes but that is rare for lifecycle
+
+
 
                     //ensure that the collect operation only runs when the composable's lifecycle is in the 'STARTED' state
                     repeatOnLifecycle(state = Lifecycle.State.STARTED) {

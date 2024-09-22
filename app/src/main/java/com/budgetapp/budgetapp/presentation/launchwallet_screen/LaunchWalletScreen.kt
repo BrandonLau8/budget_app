@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.budgetapp.budgetapp.presentation.access_screen.AccessViewModel
+import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
 import com.budgetapp.budgetapp.presentation.util.components.PlaidLinkButton
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 
@@ -32,7 +36,8 @@ internal fun LaunchWalletScreen(
     viewModel: LaunchWalletViewModel = hiltViewModel(),
     activity: ComponentActivity,
     navController: NavHostController,
-    accessViewModel: AccessViewModel = hiltViewModel()
+    accessViewModel: AccessViewModel = hiltViewModel(),
+    budgetViewModel: BudgetViewModel = hiltViewModel(),
 ) {
 
 //    Collects stream of data ('StateFlow') into a state only when Composable is active(on-screen)
@@ -58,9 +63,10 @@ internal fun LaunchWalletScreen(
             viewModel.getLinkToken()
         },
         plaidLinkButton = plaidLinkButton,
-        toBudgetScreen = {navController.navigate("budgetScreen")}
+        toBudgetScreen = {navController.navigate("budgetScreen")},
+        toLaunchScreen = {navController.navigate("launchWallet")},
+        insertBudget = {budgetViewModel.insertBudgetItem()}
     )
-
 }
 
 @Composable
@@ -68,13 +74,17 @@ fun LaunchWalletContent(
     viewState: LinkTokenState,
     onButtonClick: () -> Unit,
     toBudgetScreen: () -> Unit,
+    toLaunchScreen: () -> Unit,
+    insertBudget: () -> Unit,
     plaidLinkButton: (@Composable () -> Unit)? = null
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { MyTopAppBar(
             title = "Budgeting App",
-            toBudgetScreen = toBudgetScreen) }
+            toBudgetScreen = toBudgetScreen,
+            toLaunchScreen = toLaunchScreen,
+        ) }
     ) {paddingValues ->
 
         Column(
@@ -106,6 +116,9 @@ fun LaunchWalletContent(
                     Text(text = it)
 
                 }
+            }
+            Button(onClick = { insertBudget() }) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "add")
             }
         }
     }
