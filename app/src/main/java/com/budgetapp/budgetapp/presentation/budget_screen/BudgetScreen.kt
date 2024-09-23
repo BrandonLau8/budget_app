@@ -20,15 +20,17 @@ import androidx.navigation.NavController
 import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 
 import com.budgetapp.budgetapp.presentation.access_screen.ListItem
-import com.budgetapp.budgetapp.presentation.access_screen.NumberContainer
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
+import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 
 @Composable
 internal fun BudgetScreen(
     navController: NavController,
     viewModel: BudgetViewModel = hiltViewModel(navController.getBackStackEntry("budgetScreen")),
+    checkedStatesViewModel: CheckStatesViewModel = hiltViewModel(),
 ) {
     val viewState by viewModel.budgetState.collectAsStateWithLifecycle()
+    val totalSum by checkedStatesViewModel.totalSum.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.getAllBudgetItems()
@@ -40,7 +42,7 @@ internal fun BudgetScreen(
             BudgetContent(
                 modifier = Modifier,
                 toBudgetScreen = {},
-                toLaunchScreen = {navController.navigate("launchWallet")},
+                toAccessScreen = {navController.navigate("accessScreen")},
                 budgetItems = budgetItems
             )
         }
@@ -57,7 +59,7 @@ internal fun BudgetScreen(
 fun BudgetContent(
     modifier: Modifier,
     toBudgetScreen: () -> Unit,
-    toLaunchScreen:() -> Unit,
+    toAccessScreen:() -> Unit,
     budgetItems: List<BudgetItem>
 ) {
     Scaffold(
@@ -66,7 +68,9 @@ fun BudgetContent(
             MyTopAppBar(
                 title = "Budgetting App",
                 toBudgetScreen = toBudgetScreen,
-                toLaunchScreen = toLaunchScreen
+                toAccessScreen = toAccessScreen,
+                showNavigationIcon = true,
+                showBudgetScreen = true,
             )
         }) { paddingValues ->
         val topPadding = paddingValues.calculateTopPadding()

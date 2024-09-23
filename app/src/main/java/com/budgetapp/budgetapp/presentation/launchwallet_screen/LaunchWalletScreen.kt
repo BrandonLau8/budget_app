@@ -64,8 +64,7 @@ internal fun LaunchWalletScreen(
         },
         plaidLinkButton = plaidLinkButton,
         toBudgetScreen = {navController.navigate("budgetScreen")},
-        toLaunchScreen = {navController.navigate("launchWallet")},
-        insertBudget = {budgetViewModel.insertBudgetItem()}
+        toAccessScreen = {navController.navigate("accessScreen")},
     )
 }
 
@@ -74,8 +73,7 @@ fun LaunchWalletContent(
     viewState: LinkTokenState,
     onButtonClick: () -> Unit,
     toBudgetScreen: () -> Unit,
-    toLaunchScreen: () -> Unit,
-    insertBudget: () -> Unit,
+    toAccessScreen: () -> Unit,
     plaidLinkButton: (@Composable () -> Unit)? = null
 ) {
     Scaffold(
@@ -83,7 +81,9 @@ fun LaunchWalletContent(
         topBar = { MyTopAppBar(
             title = "Budgeting App",
             toBudgetScreen = toBudgetScreen,
-            toLaunchScreen = toLaunchScreen,
+            toAccessScreen = toAccessScreen,
+            showNavigationIcon = false,
+            showBudgetScreen = false,
         ) }
     ) {paddingValues ->
 
@@ -117,9 +117,9 @@ fun LaunchWalletContent(
 
                 }
             }
-            Button(onClick = { insertBudget() }) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "add")
-            }
+//            Button(onClick = { insertBudget() }) {
+//                Icon(imageVector = Icons.Filled.Add, contentDescription = "add")
+//            }
         }
     }
 }

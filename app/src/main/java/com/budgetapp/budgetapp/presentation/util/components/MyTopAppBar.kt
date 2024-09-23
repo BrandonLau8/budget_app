@@ -20,16 +20,27 @@ import androidx.compose.ui.unit.dp
 fun MyTopAppBar(
     title: String,
     toBudgetScreen: () -> Unit,
-    toLaunchScreen:() -> Unit
+    toAccessScreen:() -> Unit,
+    showNavigationIcon: Boolean,
+    showBudgetScreen: Boolean
 ) {
     TopAppBar(
         title = { Text(text = title) },
-        navigationIcon = { Button(onClick = { toLaunchScreen()}) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
-        }},
-        actions = { Button(onClick = {toBudgetScreen()}) {
-            Icon(imageVector = Icons.Filled.Menu, contentDescription = "Budget")
-        }},
+
+        navigationIcon = {
+            if(showNavigationIcon) {
+            Button(onClick = { toAccessScreen()}) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Go back"
+                )
+            }}},
+        actions = {
+            if(showBudgetScreen){
+            Button(onClick = {toBudgetScreen()}) {
+                Icon(imageVector = Icons.Filled.Menu, contentDescription = "Budget")
+            }
+            }},
         modifier = Modifier.shadow(5.dp))
 }
 
@@ -39,6 +50,8 @@ fun MyTopAppBarPreview() {
     MyTopAppBar(
         title = "Budget App",
         toBudgetScreen = {},
-        toLaunchScreen = {},
+        toAccessScreen = {},
+        showNavigationIcon = false,
+        showBudgetScreen = true
     )
 }

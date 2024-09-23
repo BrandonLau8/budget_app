@@ -2,14 +2,18 @@ package com.budgetapp.budgetapp.presentation.access_screen
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.domain.respository.TokenRepository
 import com.budgetapp.budgetapp.domain.respository.TransactionRepository
+import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 import com.google.android.gms.common.api.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,36 +40,6 @@ class AccessViewModel @Inject constructor(
     //A 'StateFlow' is a special kind of 'Flow' designed to hold and emit a current state and is often used for managing state in reactive manner.
     private val _accessViewState = MutableStateFlow<AccessViewState>(AccessViewState.Loading) //holds current state of type AccessViewState
     val accessViewState = _accessViewState.asStateFlow() //changes state to read  only
-
-
-    // MutableStateFlow to track checked states
-    private val _checkedStates = MutableStateFlow<Map<Transaction, Boolean>>(emptyMap())
-    val checkedStates: StateFlow<Map<Transaction, Boolean>> = _checkedStates.asStateFlow() //type is explicitlly provided since it is managing a complex data structure (map)
-
-
-
-    // Derived state to calculate the total sum of checked transactions
-    val totalSum: StateFlow<Double> = _checkedStates
-        .map { checkedStates ->
-            checkedStates.filter { it.value }.keys.sumOf { it.amount }
-        }
-        //converts the resulting flow into a 'StateFlow' that updates whenever state changes
-        .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
-
-
-    // Function to update the checked state of a transaction
-    fun updateCheckedState(transaction: Transaction, isChecked: Boolean) {
-        _checkedStates.update { currentStates ->
-            //allow mods since original 'currentStates' is immutable
-            currentStates.toMutableMap().apply {
-                this[transaction] = isChecked
-            }
-        }
-    }
-
-    fun uncheckAllTransactions() {
-        _checkedStates.value = _checkedStates.value.mapValues { false }
-    }
 
 
     fun exchangePublicToken(publicToken: String) {
@@ -149,12 +123,8 @@ class AccessViewModel @Inject constructor(
                         val trueResponse = TransactionsSyncResponse(added = transactionResponse)
 
                         _accessViewState.update {
-
                             AccessViewState.TransactionViewState(transactions = trueResponse)
                         }
-
-                        // Initialize checkedStates with the current transactions
-                        _checkedStates.value = transactionResponse.associateWith { false }
                     }
                 }
             )

@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -41,9 +45,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import arrow.core.left
+import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
+import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
+import com.budgetapp.budgetapp.presentation.util.components.NumberContainer
+import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -51,37 +59,36 @@ import java.time.format.DateTimeFormatter
 internal fun AccessScreen(
     navController: NavController,
     viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
-
-    ) {
+    budgetViewModel: BudgetViewModel = hiltViewModel(),
+    checkedStatesViewModel: CheckStatesViewModel = hiltViewModel(),
+) {
 
     // used to observe and collect state from the viewmodel. convert into format ('State
     val viewState by viewModel.accessViewState.collectAsStateWithLifecycle()
-    val checkedStates by viewModel.checkedStates.collectAsStateWithLifecycle()
-    val totalSum by viewModel.totalSum.collectAsStateWithLifecycle()
-
-//    // Debug: Log the access token to verify its value
-//    LaunchedEffect(viewState.accessToken) {
-//        Log.d("test","Access Token: ${viewState.accessToken}")
-//    }
-//
-
+    val checkedStates by checkedStatesViewModel.checkedStates.collectAsStateWithLifecycle()
+    val totalSum by checkedStatesViewModel.totalSum.collectAsStateWithLifecycle()
 
     when (viewState) {
         is AccessViewState.TransactionViewState -> {
+            val transactions = (viewState as AccessViewState.TransactionViewState).transactions
             AccessContent(
-                transactions = (viewState as AccessViewState.TransactionViewState).transactions,
+                transactions = transactions,
                 checkedStates = checkedStates,
                 onCheckedChange = { transaction, isChecked ->
-                    viewModel.updateCheckedState(transaction, isChecked)
+                    checkedStatesViewModel.updateCheckedState(transaction, isChecked)
                 },
                 totalSum = totalSum,
                 modifier = Modifier.fillMaxSize(),
 
                 onUncheckAllClick = {
-                    viewModel.uncheckAllTransactions() // Call the function to uncheck all
+                    checkedStatesViewModel.uncheckAllTransactions() // Call the function to uncheck all
                 },
                 toBudgetScreen = { navController.navigate("budgetScreen") },
-                toLaunchScreen = { navController.navigate("launchWallet") }
+                toAccessScreen = { navController.navigate("accessScreen") },
+                insertBudget = {
+                    budgetViewModel.insertBudgetItem(BudgetItem(amount = totalSum))
+                    checkedStatesViewModel.initializeCheckedStates(transactions = transactions.added)
+                }
             )
         }
 
@@ -121,6 +128,8 @@ fun PreviewAccessScreen() {
     )
     val totalSum = 100.0
 
+
+
     // Render AccessContent with dummy data
     AccessContent(
         transactions = dummyTransactions,
@@ -130,7 +139,8 @@ fun PreviewAccessScreen() {
         modifier = Modifier.fillMaxSize(),
         onUncheckAllClick = {},
         toBudgetScreen = {},
-        toLaunchScreen = {},
+        toAccessScreen = {},
+        insertBudget = {},
     )
 }
 
@@ -145,18 +155,18 @@ fun AccessContent(
     modifier: Modifier,
     onUncheckAllClick: () -> Unit, // Add this parameter
     toBudgetScreen: () -> Unit,
-    toLaunchScreen: () -> Unit,
+    toAccessScreen: () -> Unit,
+    insertBudget: () -> Unit
 ) {
-
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             MyTopAppBar(
                 title = "Budgeting App",
                 toBudgetScreen = toBudgetScreen,
-                toLaunchScreen = toLaunchScreen
-
+                toAccessScreen = toAccessScreen,
+                showNavigationIcon = true,
+                showBudgetScreen = true,
             )
         }
     ) { paddingValues ->
@@ -168,15 +178,13 @@ fun AccessContent(
                 .padding(paddingValues)
         ) {
             Row {
-//                NumberContainer(
-//                    number = totalSum,
-//                    modifier = Modifier.padding(5.dp),
-//                    onUncheckAllClick = onUncheckAllClick
-//                )
-
-                BoxScope
+                NumberContainer(
+                    number = totalSum,
+                    modifier = Modifier,
+                    onUncheckAllClick = { onUncheckAllClick() },
+                    insertBudget = { insertBudget ()}
+                )
             }
-
 
             Text(
                 text = "May 2024",
@@ -185,17 +193,12 @@ fun AccessContent(
                     .align(Alignment.Start)
             )
 
-
-
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.Start
             ) {
                 items(transactions.added) { transaction ->
                     val isChecked by rememberUpdatedState(checkedStates[transaction] ?: false)
-
-
 
                     ListItem(
                         headlineContent = {
@@ -228,86 +231,7 @@ fun AccessContent(
             }
         }
     }
-
 }
-
-@Composable
-fun NumberContainer(
-    number: Double,
-    modifier: Modifier = Modifier,
-    onUncheckAllClick: () -> Unit, // Add this parameter
-) {
-    Surface(
-        modifier = modifier
-            .size(200.dp) // Set the size of the container
-            .padding(16.dp), // Padding inside the container
-        shape = RoundedCornerShape(8.dp), // Rounded corners
-        color = Color(0xFFBBDEFB), // Background color of the container
-
-
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center, // Center items vertically
-            horizontalAlignment = Alignment.CenterHorizontally // Center items horizontally
-        ) {
-            Text(
-                text = "Amount Spent",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.Black,
-                modifier = Modifier.padding(bottom = 8.dp) // Space between texts
-            )
-            Text(
-                text = "%.2f".format(number), // Format number to 2 decimal places
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.Black
-            )
-        }
-    }
-
-    Column {
-        Surface(
-            modifier = modifier
-                .size(200.dp) // Set the size of the container
-                .padding(16.dp) // Padding inside the container
-                .clickable { onUncheckAllClick() }, // Make Surface clickable
-            shape = RoundedCornerShape(8.dp), // Rounded corners
-            color = Color(0xFFFFCDD2), // Background color of the container
-        ) {
-            // Add the button to uncheck all checkboxes
-            Box(
-                contentAlignment = Alignment.Center // Center the content inside the container
-            ) {
-
-                Text(
-                    text = "Uncheck All", // Text for the clickable surface
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black
-                )
-            }
-        }
-        Surface(
-            modifier = modifier
-                .size(200.dp) // Set the size of the container
-                .padding(16.dp) // Padding inside the container
-                .clickable { onUncheckAllClick() }, // Make Surface clickable
-            shape = RoundedCornerShape(8.dp), // Rounded corners
-            color = Color(0xFFFFCDD2), // Background color of the container
-        ) {
-            // Add the button to uncheck all checkboxes
-            Box(
-                contentAlignment = Alignment.Center // Center the content inside the container
-            ) {
-
-                Text(
-                    text = "Uncheck All", // Text for the clickable surface
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black
-                )
-            }
-        }
-    }
-    }
 
 
     @Composable

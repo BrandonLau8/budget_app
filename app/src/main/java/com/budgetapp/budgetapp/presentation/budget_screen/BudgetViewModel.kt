@@ -15,11 +15,13 @@ import com.budgetapp.budgetapp.data.BudgetRepository
 import com.budgetapp.budgetapp.data.dao.BudgetDao
 import com.budgetapp.budgetapp.data.database.BudgetDatabase
 import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
+import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -33,7 +35,7 @@ data class TestBudgetViewState (
 
 @HiltViewModel
 class BudgetViewModel @Inject constructor(
-    private val budgetRepository: BudgetRepository
+    private val budgetRepository: BudgetRepository,
 ): ViewModel() {
 
     private val _budgetState = MutableStateFlow<BudgetViewState>(BudgetViewState.Loading)
@@ -66,13 +68,13 @@ class BudgetViewModel @Inject constructor(
         }
     }
 
-    fun insertBudgetItem(){
+    fun insertBudgetItem(budgetItem: BudgetItem){
         // Set the state to loading when the data fetch starts
         _budgetState.value = BudgetViewState.Loading
         viewModelScope.launch() {
 
             try {
-                budgetRepository.addBudgetItem(BudgetItem(amount = 100.00))
+                budgetRepository.addBudgetItem(budgetItem = budgetItem)
             } catch (e: Exception) {
                 Log.d("db", e.message.toString())
             }

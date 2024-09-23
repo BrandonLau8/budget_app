@@ -11,13 +11,3 @@ sealed interface AccessViewState {
     object Error: AccessViewState
     object Loading: AccessViewState
 }
-
-//// Function to map API response to view state
-//fun mapResponseToViewState(response: Response<TransactionResponse>): AccessViewState {
-//    return if (response.isSuccessful && response.body() != null) {
-//        val transactionResponse = response.body()!!
-//        AccessViewState.TransactionViewState(transactions = transactionResponse)
-//    } else {
-//        AccessViewState.Error
-//    }
-//}
