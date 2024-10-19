@@ -9,4 +9,6 @@ interface BudgetRepository {
     suspend fun addBudgetItem(budgetItem: BudgetItem)
 
     suspend fun getAllBudgetItems(): List<BudgetItem>
+
+    suspend fun deleteBudgetItem(budgetItem: BudgetItem)
 }

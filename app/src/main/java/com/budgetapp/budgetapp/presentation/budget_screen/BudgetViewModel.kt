@@ -81,4 +81,26 @@ class BudgetViewModel @Inject constructor(
 
         }
     }
+
+    fun deleteBudgetItem(budgetItem: BudgetItem){
+        viewModelScope.launch {
+            try {
+                budgetRepository.deleteBudgetItem(budgetItem)
+
+                //Immediately update the list in memory
+                val updatedItems = _budgetState.value
+                    .let { state ->
+                        if(state is BudgetViewState.SavedBudgetViewState) {
+                            state.budgetItems.filter{it.id != budgetItem.id} //filter out the deleted item
+                        } else emptyList()
+                    }
+
+                //emit the updated list to trigger UI recomposition
+                _budgetState.value = BudgetViewState.SavedBudgetViewState(updatedItems)
+
+            } catch (e: Exception) {
+                Log.d("db", e.message.toString())
+            }
+        }
+    }
 }

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ListItem(
+fun CustomListItem(
     headlineContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     overlineContent: (@Composable () -> Unit)? = null,

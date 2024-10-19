@@ -15,4 +15,8 @@ class BudgetRepositoryImpl @Inject constructor(
     override suspend fun getAllBudgetItems(): List<BudgetItem> {
         return budgetDao.getAllBudgetItems()
     }
+
+    override suspend fun deleteBudgetItem(budgetItem: BudgetItem) {
+        return budgetDao.deleteBudgetItem(budgetItem)
+    }
 }

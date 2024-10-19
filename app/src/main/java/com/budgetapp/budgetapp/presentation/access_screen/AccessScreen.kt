@@ -49,9 +49,9 @@ import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
+import com.budgetapp.budgetapp.presentation.util.components.CustomListItem
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 import com.budgetapp.budgetapp.presentation.util.components.NumberContainer
-import com.budgetapp.budgetapp.presentation.util.components.ListItem
 import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -194,7 +194,7 @@ fun AccessContent(
                 items(transactions.added) { transaction ->
                     val isChecked by rememberUpdatedState(checkedStates[transaction] ?: false)
 
-                    ListItem(
+                    CustomListItem(
                         headlineContent = {
                             Text(
                                 text = "${transaction.amount} ${transaction.isoCurrencyCode}",

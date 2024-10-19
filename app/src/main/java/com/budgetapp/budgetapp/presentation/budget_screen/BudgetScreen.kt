@@ -1,11 +1,13 @@
 package com.budgetapp.budgetapp.presentation.budget_screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -43,7 +45,8 @@ internal fun BudgetScreen(
                 modifier = Modifier,
                 toBudgetScreen = {},
                 toAccessScreen = { navController.navigate("accessScreen") },
-                budgetItems = budgetItems
+                budgetItems = budgetItems,
+                deleteBudget = { budgetItem ->  viewModel.deleteBudgetItem(budgetItem) }
             )
         }
 
@@ -61,6 +64,7 @@ fun BudgetContent(
     toBudgetScreen: () -> Unit,
     toAccessScreen: () -> Unit,
     budgetItems: List<BudgetItem>,
+    deleteBudget: (BudgetItem) -> Unit
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -83,7 +87,15 @@ fun BudgetContent(
                     headlineContent = {
                         Text(text = "${budgetItem.amount}")
                     },
-                    supportingContent = {Text(text = "${budgetItem.date.toString()}")}
+                    supportingContent = {Text(text = "${budgetItem.date.toString()}")},
+                    trailingContent = { 
+                        Button(onClick = {
+                            deleteBudget(budgetItem)
+                            Log.d("db", "deleted")
+                        }) {
+                            Text(text = "delete")
+                    }}
+
                 )
             }
         }

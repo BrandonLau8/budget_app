@@ -2,6 +2,7 @@ package com.budgetapp.budgetapp.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -18,4 +19,7 @@ interface BudgetDao {
     // update the UI when the underlying data changes, without requiring manual updates.
     @Query("SELECT * FROM budget_item")
     suspend fun getAllBudgetItems(): List<BudgetItem>
+
+    @Delete
+    suspend fun deleteBudgetItem(budgetItem: BudgetItem)
 }
