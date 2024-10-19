@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,13 +75,19 @@ fun BudgetContent(
             )
         }) { paddingValues ->
         val topPadding = paddingValues.calculateTopPadding()
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
+//        Column(
+//            modifier = Modifier
+//                .padding(paddingValues)
+//        ) {budgetItems.forEach{budgetItem ->
+//            Text(text = "${budgetItem.amount}")
+//                }
+//            }
+
+        ListItem(
+            headlineContent = { /*TODO*/ }
         ) {budgetItems.forEach{budgetItem ->
-            Text(text = "${budgetItem.amount}")
-                }
-            }
+
+        }}
         }
     }
 

@@ -51,6 +51,7 @@ import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 import com.budgetapp.budgetapp.presentation.util.components.NumberContainer
+import com.budgetapp.budgetapp.presentation.util.components.ListItem
 import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -232,46 +233,4 @@ fun AccessContent(
         }
     }
 }
-
-
-    @Composable
-    fun ListItem(
-        headlineContent: @Composable () -> Unit,
-        modifier: Modifier = Modifier,
-        overlineContent: (@Composable () -> Unit)? = null,
-        supportingContent: (@Composable () -> Unit)? = null,
-        leadingContent: (@Composable () -> Unit)? = null,
-        trailingContent: (@Composable () -> Unit)? = null,
-        colors: ListItemColors = ListItemDefaults.colors(),
-        tonalElevation: Dp = ListItemDefaults.Elevation,
-        shadowElevation: Dp = ListItemDefaults.Elevation,
-        checkboxState: Boolean = false, // Add checkboxState parameter
-        onCheckboxCheckedChange: (Boolean) -> Unit = {}, // Callback for checkbox state change
-    ) {
-        Row(
-            modifier = modifier
-                .padding(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(color = colors.containerColor.copy(alpha = 0.1f))
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .shadow(tonalElevation, RoundedCornerShape(4.dp))
-        ) {
-            leadingContent?.invoke()
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = if (leadingContent != null) 16.dp else 0.dp)
-            ) {
-                overlineContent?.invoke()
-                headlineContent()
-                supportingContent?.invoke()
-            }
-            trailingContent?.invoke()
-            Checkbox(
-                checked = checkboxState,
-                onCheckedChange = onCheckboxCheckedChange
-            )
-        }
-    }
-
 
