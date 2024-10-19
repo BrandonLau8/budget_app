@@ -8,5 +8,5 @@ import java.time.LocalDate
 data class BudgetItem(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val amount: Double,
-//    val date: LocalDate
+    val date: String
 )

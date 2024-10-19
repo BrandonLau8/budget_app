@@ -87,7 +87,7 @@ internal fun AccessScreen(
                 toBudgetScreen = { navController.navigate("budgetScreen") },
                 toAccessScreen = { navController.navigate("accessScreen") },
                 insertBudget = {
-                    budgetViewModel.insertBudgetItem(BudgetItem(amount = totalSum))
+                    budgetViewModel.insertBudgetItem(BudgetItem(amount = totalSum, date = LocalDate.now().toString()))
                     checkedStatesViewModel.initializeCheckedStates(transactions = transactions.added)
                 }
             )
@@ -186,13 +186,6 @@ fun AccessContent(
                     insertBudget = { insertBudget ()}
                 )
             }
-
-            Text(
-                text = "May 2024",
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .align(Alignment.Start)
-            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

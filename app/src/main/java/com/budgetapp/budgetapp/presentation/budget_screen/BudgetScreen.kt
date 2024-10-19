@@ -20,7 +20,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 
-import com.budgetapp.budgetapp.presentation.access_screen.ListItem
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 
@@ -43,7 +42,7 @@ internal fun BudgetScreen(
             BudgetContent(
                 modifier = Modifier,
                 toBudgetScreen = {},
-                toAccessScreen = {navController.navigate("accessScreen")},
+                toAccessScreen = { navController.navigate("accessScreen") },
                 budgetItems = budgetItems
             )
         }
@@ -54,14 +53,14 @@ internal fun BudgetScreen(
         }
     }
 
-    }
+}
 
 @Composable
 fun BudgetContent(
     modifier: Modifier,
     toBudgetScreen: () -> Unit,
-    toAccessScreen:() -> Unit,
-    budgetItems: List<BudgetItem>
+    toAccessScreen: () -> Unit,
+    budgetItems: List<BudgetItem>,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -75,21 +74,22 @@ fun BudgetContent(
             )
         }) { paddingValues ->
         val topPadding = paddingValues.calculateTopPadding()
-//        Column(
-//            modifier = Modifier
-//                .padding(paddingValues)
-//        ) {budgetItems.forEach{budgetItem ->
-//            Text(text = "${budgetItem.amount}")
-//                }
-//            }
-
-        ListItem(
-            headlineContent = { /*TODO*/ }
-        ) {budgetItems.forEach{budgetItem ->
-
-        }}
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            budgetItems.forEach { budgetItem ->
+                ListItem(
+                    headlineContent = {
+                        Text(text = "${budgetItem.amount}")
+                    },
+                    supportingContent = {Text(text = "${budgetItem.date.toString()}")}
+                )
+            }
         }
+
     }
+}
 
 
 
