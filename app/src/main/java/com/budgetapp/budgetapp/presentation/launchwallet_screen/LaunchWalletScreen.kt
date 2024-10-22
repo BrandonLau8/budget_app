@@ -1,5 +1,6 @@
 package com.budgetapp.budgetapp.presentation.launchwallet_screen
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.budgetapp.budgetapp.presentation.access_screen.AccessViewModel
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
+import com.budgetapp.budgetapp.presentation.util.components.CredentialSignInScreen
 import com.budgetapp.budgetapp.presentation.util.components.PlaidLinkButton
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 
@@ -36,12 +38,15 @@ internal fun LaunchWalletScreen(
     viewModel: LaunchWalletViewModel = hiltViewModel(),
     activity: ComponentActivity,
     navController: NavHostController,
+    activityContext: Context,
     accessViewModel: AccessViewModel = hiltViewModel(),
     budgetViewModel: BudgetViewModel = hiltViewModel(),
 ) {
 
 //    Collects stream of data ('StateFlow') into a state only when Composable is active(on-screen)
     val viewState by viewModel.linkTokenState.collectAsStateWithLifecycle()
+
+
 
 
     // Function to create PlaidLinkButton
@@ -57,15 +62,17 @@ internal fun LaunchWalletScreen(
         }
     }
 
-    LaunchWalletContent(
-        viewState = viewState,
-        onButtonClick = {
-            viewModel.getLinkToken()
-        },
-        plaidLinkButton = plaidLinkButton,
-        toBudgetScreen = {navController.navigate("budgetScreen")},
-        toAccessScreen = {navController.navigate("accessScreen")},
-    )
+    CredentialSignInScreen(activityContext = activityContext, viewModel = viewModel)
+
+//    LaunchWalletContent(
+//        viewState = viewState,
+//        onButtonClick = {
+//            viewModel.getLinkToken()
+//        },
+//        plaidLinkButton = plaidLinkButton,
+//        toBudgetScreen = {navController.navigate("budgetScreen")},
+//        toAccessScreen = {navController.navigate("accessScreen")},
+//    )
 }
 
 @Composable
@@ -117,6 +124,7 @@ fun LaunchWalletContent(
 
                 }
             }
+
 //            Button(onClick = { insertBudget() }) {
 //                Icon(imageVector = Icons.Filled.Add, contentDescription = "add")
 //            }

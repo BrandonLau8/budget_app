@@ -1,5 +1,6 @@
 package com.budgetapp.budgetapp.ui.navigation
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -9,14 +10,17 @@ import androidx.navigation.compose.rememberNavController
 import com.budgetapp.budgetapp.presentation.access_screen.AccessScreen
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetScreen
 import com.budgetapp.budgetapp.presentation.launchwallet_screen.LaunchWalletScreen
+import dagger.hilt.android.qualifiers.ActivityContext
 
 @Composable
-fun AppNavigation(navController: NavHostController, activity: ComponentActivity) {
+fun AppNavigation(navController: NavHostController, activity: ComponentActivity, activityContext: Context) {
     NavHost(navController = navController, startDestination = "launchWallet" ) {
         composable("launchWallet") {
             LaunchWalletScreen(
                 activity = activity,
-                navController = navController)
+                navController = navController,
+                activityContext = activityContext
+            )
         }
 
         composable("accessScreen") {
@@ -30,7 +34,7 @@ fun AppNavigation(navController: NavHostController, activity: ComponentActivity)
 }
 
 @Composable
-fun MainActivityContent(activity: ComponentActivity) {
+fun MainActivityContent(activity: ComponentActivity, context: Context) {
     val navController = rememberNavController()
-    AppNavigation(navController = navController, activity = activity)
+    AppNavigation(navController = navController, activity = activity, activityContext = context)
 }

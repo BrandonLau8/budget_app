@@ -1,9 +1,21 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
+
+val localPropsFile = file("local.properties")
+val localProps = Properties()
+
+if (localPropsFile.exists()) {
+    localProps.load(FileInputStream(localPropsFile))
+}
+
 
 android {
     namespace = "com.budgetapp.budgetapp"
@@ -11,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.budgetapp.budgetapp"
-        minSdk = 29
+        minSdk = 34
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -20,6 +32,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+
     }
 
     buildTypes {
@@ -29,6 +43,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Access clientId from local.properties
+            buildConfigField("String", "CLIENT_ID", "\"${localProps["clientId"]}\"")
+        }
+        debug {
+            // Access clientId from local.properties
+            buildConfigField("String", "CLIENT_ID", "\"${localProps["clientId"]}\"")
         }
     }
     compileOptions {
@@ -40,6 +60,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true // Enable BuildConfig generation
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -49,6 +70,8 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+
 }
 
 dependencies {
@@ -84,15 +107,15 @@ dependencies {
     implementation("io.arrow-kt:arrow-fx-coroutines:1.2.4")
 
     //Retrofit
-    implementation ("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
     //Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     //Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt ("com.google.dagger:hilt-compiler:2.51.1")
+    kapt("com.google.dagger:hilt-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
@@ -109,5 +132,15 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:$room_version")
 
     // To use Kotlin annotation processing tool (kapt)
-    kapt ("androidx.room:room-compiler:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
+    //OAuth
+//    implementation ("net.openid:appauth:0.11.1") // AppAuth for OAuth
+//    implementation ("com.google.firebase:firebase-auth:21.0.1") // Firebase Auth for Google Sign-In
+//    implementation ("com.google.android.gms:play-services-auth:20.0.1") // Google Play Services Auth
+
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }
+
