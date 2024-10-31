@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.util.Properties
 
 plugins {
@@ -9,11 +10,13 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
-val localPropsFile = file("local.properties")
+val localPropsFile = file("../local.properties")
 val localProps = Properties()
 
 if (localPropsFile.exists()) {
     localProps.load(FileInputStream(localPropsFile))
+} else {
+    throw FileNotFoundException("local.properties file not found")
 }
 
 

@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainActivityContent(activity = this, context = this)
+                    MainActivityContent(activity = this)
                 }
             }
         }

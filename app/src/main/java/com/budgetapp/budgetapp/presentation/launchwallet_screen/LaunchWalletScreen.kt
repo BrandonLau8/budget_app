@@ -1,5 +1,6 @@
 package com.budgetapp.budgetapp.presentation.launchwallet_screen
 
+import android.app.Activity
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -38,7 +39,6 @@ internal fun LaunchWalletScreen(
     viewModel: LaunchWalletViewModel = hiltViewModel(),
     activity: ComponentActivity,
     navController: NavHostController,
-    activityContext: Context,
     accessViewModel: AccessViewModel = hiltViewModel(),
     budgetViewModel: BudgetViewModel = hiltViewModel(),
 ) {
@@ -62,7 +62,7 @@ internal fun LaunchWalletScreen(
         }
     }
 
-    CredentialSignInScreen(activityContext = activityContext, viewModel = viewModel)
+    CredentialSignInScreen(activity = activity, viewModel = viewModel)
 
 //    LaunchWalletContent(
 //        viewState = viewState,

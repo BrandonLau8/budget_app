@@ -1,5 +1,6 @@
 package com.budgetapp.budgetapp.data
 
+import android.credentials.GetCredentialResponse
 import arrow.core.Either
 import com.budgetapp.budgetapp.data.mapper.toNetworkError
 import com.budgetapp.budgetapp.data.remote.TokenApi
@@ -8,10 +9,12 @@ import com.budgetapp.budgetapp.domain.model.LinkTokenResponse
 import com.budgetapp.budgetapp.domain.model.NetworkError
 import com.budgetapp.budgetapp.domain.model.PublicTokenResponse
 import com.budgetapp.budgetapp.domain.respository.TokenRepository
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import retrofit2.Response
 import javax.inject.Inject
 
 class TokenRepositoryImpl @Inject constructor(
-    private val tokenApi: TokenApi
+    private val tokenApi: TokenApi,
 ): TokenRepository {
 
     override suspend fun getLinkToken(): Either<NetworkError, LinkTokenResponse> {
@@ -32,5 +35,9 @@ class TokenRepositoryImpl @Inject constructor(
         return Either.catch {
             tokenApi.exchangePublicToken(publicToken)
         }.mapLeft { it.toNetworkError() }
+    }
+
+    override suspend fun validateIdToken(credential: GoogleIdTokenCredential): Response<GetCredentialResponse> {
+        return tokenApi.validateIdToken(credential)
     }
 }
