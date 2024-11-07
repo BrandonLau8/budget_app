@@ -1,30 +1,17 @@
 package com.budgetapp.budgetapp.presentation.access_screen
 
 import android.util.Log
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.domain.respository.TokenRepository
 import com.budgetapp.budgetapp.domain.respository.TransactionRepository
-import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
-import com.google.android.gms.common.api.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 
@@ -39,6 +26,7 @@ class AccessViewModel @Inject constructor(
 
     //A 'StateFlow' is a special kind of 'Flow' designed to hold and emit a current state and is often used for managing state in reactive manner.
     private val _accessViewState = MutableStateFlow<AccessViewState>(AccessViewState.Loading) //holds current state of type AccessViewState
+//    private val _accessViewState = MutableStateFlow(AccessViewState.Loading)
     val accessViewState = _accessViewState.asStateFlow() //changes state to read  only
 
 
@@ -48,19 +36,17 @@ class AccessViewModel @Inject constructor(
         _accessViewState.update { AccessViewState.Loading }
 
         viewModelScope.launch {
+            try {
+                val response = tokenRepository.exchangePublicToken(publicToken)
+                Log.d(
+                    "AccessViewModel",
+                    "Token exchange successful: ${response.body()?.access_token}"
+                )
+                response.body()?.let { syncTransactions(it.access_token) }
 
-            val result = tokenRepository.exchangePublicToken(publicToken)
-
-            result.fold(
-                { error ->
-                    Log.e("AccessViewModel", "Token exchange failed: $error")
-
-                },
-                { response ->
-                    Log.d("AccessViewModel", "Token exchange successful: ${response.access_token}")
-                    syncTransactions(response.access_token)
-                }
-            )
+            } catch (e:Exception) {
+                Log.e("AccessViewModel", "Token exchange failed: $e")
+            }
         }
     }
 

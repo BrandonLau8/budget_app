@@ -7,6 +7,8 @@ import android.credentials.GetCredentialException
 import androidx.credentials.GetCredentialRequest
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.remember
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialResponse
@@ -18,6 +20,7 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.budgetapp.budgetapp.BuildConfig
+import com.budgetapp.budgetapp.domain.model.PayloadDto
 import com.budgetapp.budgetapp.domain.respository.TokenRepository
 import com.budgetapp.budgetapp.presentation.util.sendEvent
 import com.budgetapp.budgetapp.util.Constant
@@ -27,6 +30,11 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.plaid.link.FastOpenPlaidLink
+import com.plaid.link.Plaid
+import com.plaid.link.linkTokenConfiguration
+import com.plaid.link.result.LinkExit
+import com.plaid.link.result.LinkSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,57 +45,38 @@ import javax.inject.Inject
 @HiltViewModel
 class LaunchWalletViewModel @Inject constructor(
     private val tokenRepository: TokenRepository,
-    private val credentialManager: CredentialManager
+    private val credentialManager: CredentialManager,
 ) : ViewModel() {
 
     private val _linkTokenState = MutableStateFlow(LinkTokenState())
     val linkTokenState = _linkTokenState.asStateFlow()
 
-    val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-        .setFilterByAuthorizedAccounts(false)
-        .setServerClientId(CLIENT_ID)
-        .setAutoSelectEnabled(true)
-    .build()
 
-//    val signInWithGoogleOption: GetSignInWithGoogleOption = GetSignInWithGoogleOption.Builder()
-//        .setServerClientId(WEB_CLIENT_ID)
-//    .build()
+    //Google Sign In
+    val googleIdOption: GetGoogleIdOption =
+        GetGoogleIdOption.Builder().setFilterByAuthorizedAccounts(false)
+            .setServerClientId(CLIENT_ID).setAutoSelectEnabled(true).build()
 
-    // Retrieves the user's saved password for your app from their
-    // password provider.
-    val getPasswordOption = GetPasswordOption()
-
-    // Get passkey from the user's public key credential provider.
-//    val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-//        requestJson = requestJson
-//    )
-
-//    val getCredRequest = androidx.credentials.GetCredentialRequest(
-//        listOf(getPasswordOption, getPublicKeyCredentialOption)
-//    )
-
-    val request: GetCredentialRequest = GetCredentialRequest.Builder()
-        .addCredentialOption(googleIdOption)
-        .build()
+    val request: GetCredentialRequest =
+        GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
 
     fun getCredential(googleActivity: ComponentActivity) {
         viewModelScope.launch {
             Log.d("CredentialManager", "getCredential called")
             try {
                 val result = credentialManager.getCredential(
-                    context = googleActivity,
-                    request = request
+                    context = googleActivity, request = request
                 )
                 Log.d("CredentialManager", "Credential obtained: $result")
+
                 handleSignIn(result)
             } catch (e: NoCredentialException) {
                 Log.e("CredentialManager", "No credential available", e)
-            }  catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.e("CredentialManager", "An error occurred", e)
             }
         }
     }
-
 
     private suspend fun handleSignIn(result: GetCredentialResponse) {
         // Handle the successfully returned credential.
@@ -100,6 +89,7 @@ class LaunchWalletViewModel @Inject constructor(
                 // validate and  authenticate
 
             }
+
             is PasswordCredential -> {
                 val username = credential.id
                 val password = credential.password
@@ -112,70 +102,97 @@ class LaunchWalletViewModel @Inject constructor(
                     try {
                         // Use googleIdTokenCredential and extract the ID to validate and
                         // authenticate on your server.
-                        val googleIdTokenCredential = GoogleIdTokenCredential
-                            .createFrom(credential.data)
-                        val response = tokenRepository.validateIdToken(googleIdTokenCredential)
-                        Log.d("oauth", credential.toString())
-                        if(response.isSuccessful){
-                            Log.d("oauth", response.body().toString())
+                        val googleIdTokenCredential =
+                            GoogleIdTokenCredential.createFrom(credential.data)
+                        Log.d("handleSignIn", googleIdTokenCredential.toString())
+
+                        val response =
+                            tokenRepository.validateIdToken(googleIdTokenCredential.idToken)
+
+                        if (response.isSuccessful) {
+                            Log.d("handleSignIn", "Response: $response")
+                            val sub = response.body()?.sub
+                            Log.d("handleSignIn", "User ID (sub): $sub")
+
+                            _linkTokenState.update {
+                                it.copy(
+                                    userId = sub
+                                )
+                            }
+
+                            if (sub != null) {
+                                getLinkToken(sub)
+                            }
 
                         }
-
-
                     } catch (e: GoogleIdTokenParsingException) {
-                        Log.e("oauth", "Received an invalid google id token response", e)
+                        Log.e("handleSignIn", "Received an invalid google id token response", e)
                     }
                 } else {
                     // Catch any unrecognized custom credential type here.
-                    Log.e("oauth", "Unexpected type of credential")
+                    Log.e("handleSignIn", "Unexpected type of credential")
                 }
             }
 
             else -> {
                 // Catch any unrecognized credential type here.
-                Log.e("oauth", "Unexpected type of credential")
+                Log.e("handleSignIn", "Unexpected type of credential")
             }
         }
     }
 
-    fun getLinkToken() {
-        viewModelScope.launch {
-            _linkTokenState.update { it.copy(isLoading = true, isButtonEnabled = false) }
 
-            val result = tokenRepository.getLinkToken()
-
-            Log.d("test", "getLinkToken result: $result")
-
-            result.fold(
-                { error ->
+    fun getLinkToken(userId: String) {
+        if(userId != null) {
+            viewModelScope.launch {
+                try {
+                    val response = tokenRepository.getLinkToken()
+                    Log.d("getLinkToken", "LinkToken: $response")
                     _linkTokenState.update {
                         it.copy(
-                            isLoading = false,
-                            error = error.error.message,
-                            isButtonEnabled = true
-                        )
-                    }
-
-                    sendEvent(Event.Toast(error.error.message))
-                    Log.d("test", "getLinkToken: ${error.error.message}")
-                },
-                { response ->
-                    _linkTokenState.update {
-                        it.copy(
-                            isLoading = false,
-                            buttonText = "Token: ${response.link_token}",
-                            isButtonEnabled = true,
                             linkToken = response.link_token
                         )
                     }
-                    Log.d("test", "getLinkToken: ${response.link_token}")
+                } catch (e: Exception) {
+                    Log.e("getLinkToken", "An error occurred", e)
+                    sendEvent(Event.Toast("$e"))
                 }
-            )
-            _linkTokenState.update {
-                it.copy(isLoading = false)
             }
         }
     }
+
+//    fun getLinkToken() {
+//        viewModelScope.launch {
+//            _linkTokenState.update { it.copy(isLoading = true, isButtonEnabled = false) }
+//
+//            val result = tokenRepository.getLinkToken()
+//
+//            Log.d("test", "getLinkToken result: $result")
+//
+//            result.fold({ error ->
+//                _linkTokenState.update {
+//                    it.copy(
+//                        isLoading = false, error = error.error.message, isButtonEnabled = true
+//                    )
+//                }
+//
+//                sendEvent(Event.Toast(error.error.message))
+//                Log.d("test", "getLinkToken: ${error.error.message}")
+//            }, { response ->
+//                _linkTokenState.update {
+//                    it.copy(
+//                        isLoading = false,
+//                        isButtonEnabled = true,
+//                        linkToken = response.link_token
+//                    )
+//                }
+//                Log.d("test", "getLinkToken: ${response.link_token}")
+//            })
+//            _linkTokenState.update {
+//                it.copy(isLoading = false)
+//            }
+//        }
+//    }
 
 
 }

@@ -30,9 +30,8 @@ fun PlaidLinkButton(
     token: String,
     activity: ComponentActivity,
     navController: NavController,
-    viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet"))
-
-
+    viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
+    launchWalletViewModel: LaunchWalletViewModel = hiltViewModel(),
 ) {
 
 //    val publicTokenRequest by viewModel.publicTokenRequest.collectAsStateWithLifecycle()
@@ -51,8 +50,6 @@ fun PlaidLinkButton(
     val launcher = rememberLauncherForActivityResult(contract = FastOpenPlaidLink()) { result ->
         when (result) {
             is LinkSuccess -> {
-
-//                viewModel.getPublicToken(result.publicToken)
                 viewModel.exchangePublicToken(result.publicToken)
 
 
@@ -62,18 +59,17 @@ fun PlaidLinkButton(
                 }
 
             }
+
             is LinkExit -> handleLinkExit(result)
         }
     }
 
-    val result =
-
-
+    val googleSignIn = launchWalletViewModel.getCredential(activity)
 
     // UI with button to trigger Plaid Link flow
     Button(
         onClick = {
-            launcher.launch(plaidHandler)
+                launcher.launch(plaidHandler)
         },
         modifier = Modifier
             .width(200.dp)  // Set a specific width

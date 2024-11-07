@@ -2,7 +2,9 @@ package com.budgetapp.budgetapp.presentation.launchwallet_screen
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,8 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,10 +33,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.budgetapp.budgetapp.presentation.access_screen.AccessViewModel
+import com.budgetapp.budgetapp.presentation.access_screen.AccessViewState
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
 import com.budgetapp.budgetapp.presentation.util.components.CredentialSignInScreen
 import com.budgetapp.budgetapp.presentation.util.components.PlaidLinkButton
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
+
+import com.plaid.link.FastOpenPlaidLink
+import com.plaid.link.Plaid
+import com.plaid.link.linkTokenConfiguration
+import com.plaid.link.result.LinkExit
+import com.plaid.link.result.LinkSuccess
 
 @Composable
 //internal encapsulates within module
@@ -47,52 +59,48 @@ internal fun LaunchWalletScreen(
     val viewState by viewModel.linkTokenState.collectAsStateWithLifecycle()
 
 
+//    // Function to create PlaidLinkButton
+//    val plaidLinkButton: @Composable () -> Unit = {
+//        viewState.linkToken?.let { token ->
+//            PlaidLinkButton(
+//                token = token,
+//                activity = activity,
+//                navController = navController,
+//                viewModel = accessViewModel
+//
+//            )
+//        }
+//    }
 
+//    CredentialSignInScreen(activity = activity, viewModel = viewModel)
 
-    // Function to create PlaidLinkButton
-    val plaidLinkButton: @Composable () -> Unit = {
-        viewState.linkToken?.let { token ->
-            PlaidLinkButton(
-                token = token,
-                activity = activity,
-                navController = navController,
-                viewModel = accessViewModel
-
-            )
-        }
-    }
-
-    CredentialSignInScreen(activity = activity, viewModel = viewModel)
-
-//    LaunchWalletContent(
-//        viewState = viewState,
-//        onButtonClick = {
-//            viewModel.getLinkToken()
-//        },
-//        plaidLinkButton = plaidLinkButton,
-//        toBudgetScreen = {navController.navigate("budgetScreen")},
-//        toAccessScreen = {navController.navigate("accessScreen")},
-//    )
+    LaunchWalletContent(
+        viewState = viewState,
+        toBudgetScreen = {navController.navigate("budgetScreen")},
+        toAccessScreen = {navController.navigate("accessScreen")},
+        toGoogleSignIn = {viewModel.getCredential(activity)},
+    )
 }
 
 @Composable
 fun LaunchWalletContent(
     viewState: LinkTokenState,
-    onButtonClick: () -> Unit,
     toBudgetScreen: () -> Unit,
     toAccessScreen: () -> Unit,
-    plaidLinkButton: (@Composable () -> Unit)? = null
+    toGoogleSignIn: ()-> Unit,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { MyTopAppBar(
-            title = "Budgeting App",
-            toBudgetScreen = toBudgetScreen,
-            toAccessScreen = toAccessScreen,
-            showNavigationIcon = false,
-            showBudgetScreen = false,
-        ) }
-    ) {paddingValues ->
+        topBar = {
+            MyTopAppBar(
+                title = "Budgeting App",
+                toBudgetScreen = toBudgetScreen,
+                toAccessScreen = toAccessScreen,
+                showNavigationIcon = false,
+                showBudgetScreen = false,
+            )
+        }
+    ) { paddingValues ->
 
         Column(
             modifier = Modifier
@@ -104,30 +112,33 @@ fun LaunchWalletContent(
             if (viewState.isLoading) {
                 CircularProgressIndicator()
             } else {
-                    Button(
-                        onClick = onButtonClick,
-                        enabled = viewState.isButtonEnabled,
-                        modifier = Modifier
-                            .padding(bottom = 8.dp)
-                    ) {
-                        Text(viewState.buttonText)
-                    }
-
-               if(viewState.linkToken != null) {
-                   // Display the PlaidLinkButton if provided
-                   plaidLinkButton?.invoke()
-               }
-
-                viewState.error?.let {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = it)
-
+                Button(
+                    onClick = toGoogleSignIn,
+                    enabled = viewState.isButtonEnabled,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                ) {
+                    Text(viewState.buttonText)
                 }
-            }
 
-//            Button(onClick = { insertBudget() }) {
-//                Icon(imageVector = Icons.Filled.Add, contentDescription = "add")
+                LaunchedEffect(viewState.linkToken) {
+                    viewState.linkToken?.let {
+                        toAccessScreen()
+                    }
+                }
+//                if (viewState.linkToken != null) {
+//                    toAccessScreen.invoke()
+////                   // Display the PlaidLinkButton if provided
+////                   plaidLinkButton?.invoke()
+//                }
+
+//                viewState.error?.let {
+//                    Spacer(modifier = Modifier.height(16.dp))
+//                    Text(text = it)
+//                }
 //            }
+
+            }
         }
     }
 }
