@@ -26,6 +26,7 @@ import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
 import com.budgetapp.budgetapp.presentation.util.components.CustomListItem
+import com.budgetapp.budgetapp.presentation.util.components.MyBottomAppBar
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 import com.budgetapp.budgetapp.presentation.util.components.NumberContainer
 import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
@@ -95,7 +96,9 @@ internal fun AccessScreen(
                     )
                 }
             )
+
         }
+
     }
 }
 
@@ -174,6 +177,7 @@ fun AccessContent(
                         insertBudget = { insertBudget() }
                     )
                 }
+                MyBottomAppBar(number = totalSum)
 
 //            LazyColumn(
 //                modifier = Modifier.fillMaxSize(),
