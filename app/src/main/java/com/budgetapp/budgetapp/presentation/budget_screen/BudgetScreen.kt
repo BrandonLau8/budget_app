@@ -46,7 +46,7 @@ internal fun BudgetScreen(
                 toBudgetScreen = {},
                 toAccessScreen = { navController.navigate("accessScreen") },
                 budgetItems = budgetItems,
-                deleteBudget = { budgetItem ->  viewModel.deleteBudgetItem(budgetItem) }
+                deleteBudget = { budgetItem -> viewModel.deleteBudgetItem(budgetItem) }
             )
         }
 
@@ -64,43 +64,41 @@ fun BudgetContent(
     toBudgetScreen: () -> Unit,
     toAccessScreen: () -> Unit,
     budgetItems: List<BudgetItem>,
-    deleteBudget: (BudgetItem) -> Unit
+    deleteBudget: (BudgetItem) -> Unit,
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            MyTopAppBar(
-                title = "Budgetting App",
-                toBudgetScreen = toBudgetScreen,
-                toAccessScreen = toAccessScreen,
-                showNavigationIcon = true,
-                showBudgetScreen = true,
-            )
-        }) { paddingValues ->
-        val topPadding = paddingValues.calculateTopPadding()
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-        ) {
-            budgetItems.forEach { budgetItem ->
-                ListItem(
-                    headlineContent = {
-                        Text(text = "${budgetItem.amount}")
-                    },
-                    supportingContent = {Text(text = "${budgetItem.date.toString()}")},
-                    trailingContent = { 
-                        Button(onClick = {
-                            deleteBudget(budgetItem)
-                            Log.d("db", "deleted")
-                        }) {
-                            Text(text = "delete")
-                    }}
 
-                )
+    MyTopAppBar(
+        title = "Budgetting App",
+        toBudgetScreen = toBudgetScreen,
+        toAccessScreen = toAccessScreen,
+        showNavigationIcon = true,
+        showBudgetScreen = true,
+        content = { modifier ->
+
+            Column(
+                modifier = modifier.fillMaxSize()
+            ) {
+                budgetItems.forEach { budgetItem ->
+                    ListItem(
+                        headlineContent = {
+                            Text(text = "${budgetItem.amount}")
+                        },
+                        supportingContent = { Text(text = "${budgetItem.date.toString()}") },
+                        trailingContent = {
+                            Button(onClick = {
+                                deleteBudget(budgetItem)
+                                Log.d("db", "deleted")
+                            }) {
+                                Text(text = "delete")
+                            }
+                        }
+
+                    )
+                }
             }
-        }
 
-    }
+        }
+    )
 }
 
 

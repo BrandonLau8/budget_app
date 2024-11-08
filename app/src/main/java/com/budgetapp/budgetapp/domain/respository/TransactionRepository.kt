@@ -6,5 +6,5 @@ import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import retrofit2.Response
 
 interface TransactionRepository {
-    suspend fun syncTransaction(accessToken: String): Either<NetworkError, Response<TransactionsSyncResponse>>
+    suspend fun syncTransaction(accessToken: String): Response<TransactionsSyncResponse>
 }

@@ -76,9 +76,9 @@ internal fun LaunchWalletScreen(
 
     LaunchWalletContent(
         viewState = viewState,
-        toBudgetScreen = {navController.navigate("budgetScreen")},
-        toAccessScreen = {navController.navigate("accessScreen")},
-        toGoogleSignIn = {viewModel.getCredential(activity)},
+        toBudgetScreen = { navController.navigate("budgetScreen") },
+        toAccessScreen = { navController.navigate("accessScreen") },
+        toGoogleSignIn = { viewModel.getCredential(activity) },
     )
 }
 
@@ -87,45 +87,39 @@ fun LaunchWalletContent(
     viewState: LinkTokenState,
     toBudgetScreen: () -> Unit,
     toAccessScreen: () -> Unit,
-    toGoogleSignIn: ()-> Unit,
+    toGoogleSignIn: () -> Unit,
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            MyTopAppBar(
-                title = "Budgeting App",
-                toBudgetScreen = toBudgetScreen,
-                toAccessScreen = toAccessScreen,
-                showNavigationIcon = false,
-                showBudgetScreen = false,
-            )
-        }
-    ) { paddingValues ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (viewState.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    onClick = toGoogleSignIn,
-                    enabled = viewState.isButtonEnabled,
-                    modifier = Modifier
-                        .padding(bottom = 8.dp)
-                ) {
-                    Text(viewState.buttonText)
-                }
+    MyTopAppBar(
+        title = "Budgeting App",
+        toBudgetScreen = toBudgetScreen,
+        toAccessScreen = toAccessScreen,
+        showNavigationIcon = false,
+        showBudgetScreen = false,
+        content = { modifier ->
 
-                LaunchedEffect(viewState.linkToken) {
-                    viewState.linkToken?.let {
-                        toAccessScreen()
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (viewState.isLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    Button(
+                        onClick = toGoogleSignIn,
+                        enabled = viewState.isButtonEnabled,
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                    ) {
+                        Text(viewState.buttonText)
                     }
-                }
+
+                    LaunchedEffect(viewState.linkToken) {
+                        viewState.linkToken?.let {
+                            toAccessScreen()
+                        }
+                    }
 //                if (viewState.linkToken != null) {
 //                    toAccessScreen.invoke()
 ////                   // Display the PlaidLinkButton if provided
@@ -138,7 +132,8 @@ fun LaunchWalletContent(
 //                }
 //            }
 
+                }
             }
         }
-    }
+    )
 }

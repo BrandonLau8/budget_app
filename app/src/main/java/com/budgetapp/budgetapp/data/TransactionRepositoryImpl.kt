@@ -15,9 +15,8 @@ class TransactionRepositoryImpl @Inject constructor(
     private val transactionApi: TransactionApi
 ): TransactionRepository {
 
-    override suspend fun syncTransaction(accessToken: String): Either<NetworkError, Response<TransactionsSyncResponse>> {
-        return Either.catch {
-       transactionApi.syncTransaction(accessToken)
+    override suspend fun syncTransaction(accessToken: String): Response<TransactionsSyncResponse> {
+        return transactionApi.syncTransaction(accessToken)
             // Log the raw JSON response
 //            response.raw().use { rawResponse ->
 //                Log.d("test", "Raw JSON Response: ${rawResponse.body?.string()}")
@@ -25,10 +24,5 @@ class TransactionRepositoryImpl @Inject constructor(
 //
 //            response
 
-        }.mapLeft { exception ->
-//            it.toNetworkError()
-            Log.e("test", "Error occurred: ${exception.message}", exception)
-            exception.toNetworkError()
-        }
     }
 }

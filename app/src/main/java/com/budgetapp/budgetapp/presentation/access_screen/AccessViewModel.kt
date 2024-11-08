@@ -25,8 +25,8 @@ class AccessViewModel @Inject constructor(
 ) : ViewModel() {
 
     //A 'StateFlow' is a special kind of 'Flow' designed to hold and emit a current state and is often used for managing state in reactive manner.
-    private val _accessViewState = MutableStateFlow<AccessViewState>(AccessViewState.Loading) //holds current state of type AccessViewState
-//    private val _accessViewState = MutableStateFlow(AccessViewState.Loading)
+    private val _accessViewState =
+        MutableStateFlow<AccessViewState>(AccessViewState.Empty) //holds current state of type AccessViewState
     val accessViewState = _accessViewState.asStateFlow() //changes state to read  only
 
 
@@ -44,7 +44,7 @@ class AccessViewModel @Inject constructor(
                 )
                 response.body()?.let { syncTransactions(it.access_token) }
 
-            } catch (e:Exception) {
+            } catch (e: Exception) {
                 Log.e("AccessViewModel", "Token exchange failed: $e")
             }
         }
@@ -55,17 +55,12 @@ class AccessViewModel @Inject constructor(
         _accessViewState.update { AccessViewState.Loading }
 
         viewModelScope.launch {
-            val result = transactionRepository.syncTransaction(accessToken)
 
-            result.fold(
-                { error ->
-                    Log.d("AccessViewModel", error.error.message)
-                },
-                { response ->
-                    // Check if the response is successful and contains a body
-                    if (response.isSuccessful && response.body() != null) {
-                        val transactionResponse = response.body()!!.added
-                        Log.d("AccessViewModel", transactionResponse.toString())
+            try {
+                val response = transactionRepository.syncTransaction(accessToken)
+                if (response.isSuccessful && response.body() != null) {
+                    val transactionResponse = response.body()!!.added
+                    Log.d("AccessViewModel", transactionResponse.toString())
 
 //                        val sampleTransactions = listOf(
 //                            Transaction(
@@ -106,14 +101,16 @@ class AccessViewModel @Inject constructor(
 //                            added = sampleTransactions
 //                        )
 
-                        val trueResponse = TransactionsSyncResponse(added = transactionResponse)
+                    val trueResponse = TransactionsSyncResponse(added = transactionResponse)
 
-                        _accessViewState.update {
-                            AccessViewState.TransactionViewState(transactions = trueResponse)
-                        }
+                    _accessViewState.update {
+                        AccessViewState.TransactionViewState(transactions = trueResponse)
                     }
                 }
-            )
+            } catch (e: Exception) {
+
+                Log.d("AccessViewModel", "$e")
+            }
         }
     }
 

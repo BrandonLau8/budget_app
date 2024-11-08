@@ -150,7 +150,7 @@ class LaunchWalletViewModel @Inject constructor(
                     Log.d("getLinkToken", "LinkToken: $response")
                     _linkTokenState.update {
                         it.copy(
-                            linkToken = response.link_token
+                            linkToken = response.body()?.link_token
                         )
                     }
                 } catch (e: Exception) {
