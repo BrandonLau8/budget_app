@@ -36,7 +36,6 @@ import com.budgetapp.budgetapp.presentation.access_screen.AccessViewModel
 import com.budgetapp.budgetapp.presentation.access_screen.AccessViewState
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
 import com.budgetapp.budgetapp.presentation.util.components.CredentialSignInScreen
-import com.budgetapp.budgetapp.presentation.util.components.PlaidLinkButton
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 
 import com.plaid.link.FastOpenPlaidLink
@@ -51,28 +50,18 @@ internal fun LaunchWalletScreen(
     viewModel: LaunchWalletViewModel = hiltViewModel(),
     activity: ComponentActivity,
     navController: NavHostController,
-    accessViewModel: AccessViewModel = hiltViewModel(),
-    budgetViewModel: BudgetViewModel = hiltViewModel(),
 ) {
 
 //    Collects stream of data ('StateFlow') into a state only when Composable is active(on-screen)
-    val viewState by viewModel.linkTokenState.collectAsStateWithLifecycle()
+    val viewState by viewModel.linkTokenState.collectAsState()
 
-
-//    // Function to create PlaidLinkButton
-//    val plaidLinkButton: @Composable () -> Unit = {
-//        viewState.linkToken?.let { token ->
-//            PlaidLinkButton(
-//                token = token,
-//                activity = activity,
-//                navController = navController,
-//                viewModel = accessViewModel
-//
-//            )
-//        }
-//    }
-
-//    CredentialSignInScreen(activity = activity, viewModel = viewModel)
+    // Once the link token is available, navigate to AccessScreen
+    LaunchedEffect(viewState.linkToken) {
+        viewState.linkToken?.let {
+            // Passing the linkToken as an argument to AccessScreen
+            navController.navigate("accessScreen/$it")
+        }
+    }
 
     LaunchWalletContent(
         viewState = viewState,
@@ -115,11 +104,9 @@ fun LaunchWalletContent(
                         Text(viewState.buttonText)
                     }
 
-                    LaunchedEffect(viewState.linkToken) {
-                        viewState.linkToken?.let {
-                            toAccessScreen()
-                        }
-                    }
+
+
+
 //                if (viewState.linkToken != null) {
 //                    toAccessScreen.invoke()
 ////                   // Display the PlaidLinkButton if provided

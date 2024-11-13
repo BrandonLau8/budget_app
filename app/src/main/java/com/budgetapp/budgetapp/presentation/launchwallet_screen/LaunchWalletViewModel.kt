@@ -19,7 +19,7 @@ import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.budgetapp.budgetapp.BuildConfig
+
 import com.budgetapp.budgetapp.domain.model.PayloadDto
 import com.budgetapp.budgetapp.domain.respository.TokenRepository
 import com.budgetapp.budgetapp.presentation.util.sendEvent
@@ -142,8 +142,8 @@ class LaunchWalletViewModel @Inject constructor(
     }
 
 
-    fun getLinkToken(userId: String) {
-        if(userId != null) {
+    private fun getLinkToken(userId: String) {
+        if (userId != null) {
             viewModelScope.launch {
                 try {
                     val response = tokenRepository.getLinkToken()
@@ -160,39 +160,4 @@ class LaunchWalletViewModel @Inject constructor(
             }
         }
     }
-
-//    fun getLinkToken() {
-//        viewModelScope.launch {
-//            _linkTokenState.update { it.copy(isLoading = true, isButtonEnabled = false) }
-//
-//            val result = tokenRepository.getLinkToken()
-//
-//            Log.d("test", "getLinkToken result: $result")
-//
-//            result.fold({ error ->
-//                _linkTokenState.update {
-//                    it.copy(
-//                        isLoading = false, error = error.error.message, isButtonEnabled = true
-//                    )
-//                }
-//
-//                sendEvent(Event.Toast(error.error.message))
-//                Log.d("test", "getLinkToken: ${error.error.message}")
-//            }, { response ->
-//                _linkTokenState.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        isButtonEnabled = true,
-//                        linkToken = response.link_token
-//                    )
-//                }
-//                Log.d("test", "getLinkToken: ${response.link_token}")
-//            })
-//            _linkTokenState.update {
-//                it.copy(isLoading = false)
-//            }
-//        }
-//    }
-
-
 }

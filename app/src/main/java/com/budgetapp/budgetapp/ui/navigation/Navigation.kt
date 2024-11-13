@@ -23,8 +23,9 @@ fun AppNavigation(navController: NavHostController, activity: ComponentActivity)
             )
         }
 
-        composable("accessScreen") {
-            AccessScreen(navController = navController)
+        composable("accessScreen/{linkToken}") { backStackEntry ->
+            val linkToken = backStackEntry.arguments?.getString("linkToken")
+            AccessScreen(navController = navController, activity = activity, linkToken=linkToken)
         }
 
         composable("budgetScreen") {

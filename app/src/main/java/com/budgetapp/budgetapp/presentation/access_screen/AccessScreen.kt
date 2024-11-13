@@ -1,6 +1,11 @@
 package com.budgetapp.budgetapp.presentation.access_screen
 
 import android.annotation.SuppressLint
+import android.os.Build
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,26 +32,63 @@ import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
 import com.budgetapp.budgetapp.domain.model.transaction.Transaction
 import com.budgetapp.budgetapp.domain.model.transaction.TransactionsSyncResponse
 import com.budgetapp.budgetapp.presentation.budget_screen.BudgetViewModel
+import com.budgetapp.budgetapp.presentation.launchwallet_screen.LaunchWalletViewModel
+import com.budgetapp.budgetapp.presentation.launchwallet_screen.LinkTokenState
 import com.budgetapp.budgetapp.presentation.util.components.CustomListItem
 import com.budgetapp.budgetapp.presentation.util.components.MyBottomAppBar
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 import com.budgetapp.budgetapp.presentation.util.components.NumberContainer
 import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
+import com.plaid.link.FastOpenPlaidLink
+import com.plaid.link.Plaid
+import com.plaid.link.linkTokenConfiguration
+import com.plaid.link.result.LinkExit
+import com.plaid.link.result.LinkSuccess
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 internal fun AccessScreen(
+    linkToken:String?,
     navController: NavController,
     viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
     budgetViewModel: BudgetViewModel = hiltViewModel(),
     checkedStatesViewModel: CheckStatesViewModel = hiltViewModel(),
+    activity: ComponentActivity
 ) {
+
+
 
     // used to observe and collect state from the viewmodel. convert into format ('State
     val viewState by viewModel.accessViewState.collectAsStateWithLifecycle()
     val checkedStates by checkedStatesViewModel.checkedStates.collectAsStateWithLifecycle()
     val totalSum by checkedStatesViewModel.totalSum.collectAsStateWithLifecycle()
+
+
+    val linkTokenConfiguration = linkTokenConfiguration {
+        this.token = linkToken
+    }
+
+    // Initialize PlaidHandler with the link token
+    val plaidHandler = remember(linkToken) {
+        Plaid.create(activity.application, linkTokenConfiguration)
+    }
+
+    // Ensure ActivityResultLauncher is registered before the Activity is in RESUMED state
+    val launcher = rememberLauncherForActivityResult(contract = FastOpenPlaidLink()) { result ->
+        when (result) {
+            is LinkSuccess -> {
+                viewModel.exchangePublicToken(result.publicToken)
+
+                if (viewState is AccessViewState.TransactionViewState) {
+                    Log.d("AccessScreen", "Navigating to accessScreen")
+                    navController.navigate("accessScreen")
+                }
+            }
+            is LinkExit -> {}
+        }
+    }
 
     when (viewState) {
         is AccessViewState.TransactionViewState -> {
@@ -66,6 +110,9 @@ internal fun AccessScreen(
                 insertBudget = {
 //                    budgetViewModel.insertBudgetItem(BudgetItem(amount = totalSum, date = LocalDate.now().toString()))
 //                    checkedStatesViewModel.initializeCheckedStates(transactions = transactions.added)
+                },
+                toPlaidLink = { launcher.launch(plaidHandler)
+                Log.d("plaid", "hello")
                 }
             )
         }
@@ -94,14 +141,19 @@ internal fun AccessScreen(
                             date = LocalDate.now().toString()
                         )
                     )
-                }
+                },
+                toPlaidLink = { launcher.launch(plaidHandler)
+                    Log.d("plaid", "hello")}
             )
 
         }
 
     }
+
+
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun PreviewAccessScreen() {
@@ -140,6 +192,7 @@ fun PreviewAccessScreen() {
         toBudgetScreen = {},
         toAccessScreen = {},
         insertBudget = {},
+        toPlaidLink = {}
     )
 }
 
@@ -150,6 +203,7 @@ fun AccessContent(
 //    transactions: TransactionsSyncResponse,
 //    checkedStates: Map<Transaction, Boolean>,
 //    onCheckedChange: (Transaction, Boolean) -> Unit,
+    toPlaidLink: () -> Unit,
     totalSum: Double,
     modifier: Modifier,
     onUncheckAllClick: () -> Unit, // Add this parameter
@@ -177,7 +231,11 @@ fun AccessContent(
                         insertBudget = { insertBudget() }
                     )
                 }
-                MyBottomAppBar(number = totalSum)
+                MyBottomAppBar(
+                    number = totalSum,
+                    toPlaidLink = {toPlaidLink()}
+
+                )
 
 //            LazyColumn(
 //                modifier = Modifier.fillMaxSize(),
