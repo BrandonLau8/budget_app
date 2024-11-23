@@ -1,6 +1,8 @@
 package com.budgetapp.budgetapp.di
 
+import android.os.Build
 import android.view.SurfaceControl.Transaction
+import androidx.annotation.RequiresApi
 import com.budgetapp.budgetapp.data.remote.TokenApi
 import com.budgetapp.budgetapp.data.remote.TransactionApi
 import com.budgetapp.budgetapp.util.Constant.BASE_URL
@@ -41,6 +43,7 @@ object AppModule {
     }
 
     //simplifies api calls. user convertors to automatically serialize and deserialize json or xml data
+    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
