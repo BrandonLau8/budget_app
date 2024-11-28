@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,14 +52,13 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 internal fun AccessScreen(
-    linkToken:String?,
+    linkToken: String?,
     navController: NavController,
     viewModel: AccessViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
     budgetViewModel: BudgetViewModel = hiltViewModel(),
     checkedStatesViewModel: CheckStatesViewModel = hiltViewModel(),
-    activity: ComponentActivity
+    activity: ComponentActivity,
 ) {
-
 
 
     // used to observe and collect state from the viewmodel. convert into format ('State
@@ -86,6 +87,7 @@ internal fun AccessScreen(
                     navController.navigate("accessScreen")
                 }
             }
+
             is LinkExit -> {}
         }
     }
@@ -94,11 +96,11 @@ internal fun AccessScreen(
         is AccessViewState.TransactionViewState -> {
             val transactions = (viewState as AccessViewState.TransactionViewState).transactions
             AccessContent(
-//                transactions = transactions,
-//                checkedStates = checkedStates,
-//                onCheckedChange = { transaction, isChecked ->
-//                    checkedStatesViewModel.updateCheckedState(transaction, isChecked)
-//                },
+                transactions = transactions,
+                checkedStates = checkedStates,
+                onCheckedChange = { transaction, isChecked ->
+                    checkedStatesViewModel.updateCheckedState(transaction, isChecked)
+                },
                 totalSum = totalSum,
                 modifier = Modifier.fillMaxSize(),
 
@@ -108,11 +110,17 @@ internal fun AccessScreen(
                 toBudgetScreen = { navController.navigate("budgetScreen") },
                 toAccessScreen = { navController.navigate("accessScreen") },
                 insertBudget = {
-//                    budgetViewModel.insertBudgetItem(BudgetItem(amount = totalSum, date = LocalDate.now().toString()))
-//                    checkedStatesViewModel.initializeCheckedStates(transactions = transactions.added)
+                    budgetViewModel.insertBudgetItem(
+                        BudgetItem(
+                            amount = totalSum,
+                            date = LocalDate.now().toString()
+                        )
+                    )
+                    checkedStatesViewModel.initializeCheckedStates(transactions = transactions.added)
                 },
-                toPlaidLink = { launcher.launch(plaidHandler)
-                Log.d("plaid", "hello")
+                toPlaidLink = {
+                    launcher.launch(plaidHandler)
+                    Log.d("plaid", "hello")
                 }
             )
         }
@@ -127,6 +135,11 @@ internal fun AccessScreen(
 
         is AccessViewState.Empty -> {
             AccessContent(
+                transactions = TransactionsSyncResponse(emptyList()),
+                checkedStates = checkedStates,
+                onCheckedChange = { transaction, isChecked ->
+                    checkedStatesViewModel.updateCheckedState(transaction, isChecked)
+                },
                 totalSum = totalSum,
                 modifier = Modifier.fillMaxSize(),
                 onUncheckAllClick = {
@@ -142,8 +155,10 @@ internal fun AccessScreen(
                         )
                     )
                 },
-                toPlaidLink = { launcher.launch(plaidHandler)
-                    Log.d("plaid", "hello")}
+                toPlaidLink = {
+                    launcher.launch(plaidHandler)
+                    Log.d("plaid", "hello")
+                }
             )
 
         }
@@ -183,11 +198,11 @@ fun PreviewAccessScreen() {
 
     // Render AccessContent with dummy data
     AccessContent(
-//        transactions = dummyTransactions,
-//        checkedStates = checkedStates,
-//        onCheckedChange = { _, _ -> },
+        transactions = dummyTransactions,
+        checkedStates = checkedStates,
+        onCheckedChange = { _, _ -> },
         totalSum = totalSum,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier,
         onUncheckAllClick = {},
         toBudgetScreen = {},
         toAccessScreen = {},
@@ -197,125 +212,197 @@ fun PreviewAccessScreen() {
 }
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AccessContent(
-//    transactions: TransactionsSyncResponse,
-//    checkedStates: Map<Transaction, Boolean>,
-//    onCheckedChange: (Transaction, Boolean) -> Unit,
+    transactions: TransactionsSyncResponse,
+    checkedStates: Map<Transaction, Boolean>,
+    onCheckedChange: (Transaction, Boolean) -> Unit,
     toPlaidLink: () -> Unit,
     totalSum: Double,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onUncheckAllClick: () -> Unit, // Add this parameter
     toBudgetScreen: () -> Unit,
     toAccessScreen: () -> Unit,
     insertBudget: () -> Unit,
 ) {
 
-    MyTopAppBar(
-        title = "Budgeting App",
-        toBudgetScreen = toBudgetScreen,
-        toAccessScreen = toAccessScreen,
-        showNavigationIcon = true,
-        showBudgetScreen = true,
-        content = { modifier ->
+    Scaffold(
+        topBar = {
+            MyTopAppBar(
+                title = "Budgeting App",
+                toBudgetScreen = toBudgetScreen,
+                toAccessScreen = toAccessScreen,
+                showNavigationIcon = false,
+                showBudgetScreen = true
+            )
+        },
+        bottomBar = {
+            MyBottomAppBar(
+                number = totalSum,
+                toPlaidLink = { toPlaidLink() }
+            )
+        },
+        content = { innerPadding ->
 
             Column(
-                modifier = modifier.fillMaxSize()
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(innerPadding) // Apply padding from scaffold
             ) {
-                Row {
                     NumberContainer(
                         number = totalSum,
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         onUncheckAllClick = { onUncheckAllClick() },
                         insertBudget = { insertBudget() }
                     )
-                }
-                MyBottomAppBar(
-                    number = totalSum,
-                    toPlaidLink = {toPlaidLink()}
 
+                TransactionContent(
+                    transactions = transactions,
+                    checkedStates = checkedStates,
+                    onCheckedChange = onCheckedChange,
+                    modifier = Modifier
+                        .fillMaxSize() // Ensure it takes up the remaining space
                 )
-
-//            LazyColumn(
-//                modifier = Modifier.fillMaxSize(),
-//                horizontalAlignment = Alignment.Start
-//            ) {
-//                items(transactions.added) { transaction ->
-//                    val isChecked by rememberUpdatedState(checkedStates[transaction] ?: false)
-//
-//                    CustomListItem(
-//                        headlineContent = {
-//                            Text(
-//                                text = "${transaction.amount} ${transaction.isoCurrencyCode}",
-//                                modifier = Modifier.padding(bottom = 4.dp)
-//                            )
-//                        },
-//                        supportingContent = {
-//                            Text(
-//                                text = transaction.date.toString(),
-//                                style = MaterialTheme.typography.bodySmall,
-//                                color = MaterialTheme.colorScheme.secondary
-//                            )
-//                        },
-//                        overlineContent = {
-//                            Text(
-//                                text = transaction.name,
-//                                style = MaterialTheme.typography.bodySmall,
-//                                color = MaterialTheme.colorScheme.secondary
-//                            )
-//                        },
-//                        checkboxState = isChecked,
-//                        onCheckboxCheckedChange = { checked ->
-//                            onCheckedChange(transaction, checked)
-//                        },
-//                        modifier = Modifier.padding(vertical = 4.dp)
-//                    )
+                }
             }
-        }
     )
-}
+
+//    MyTopAppBar(
+//        title = "Budgeting App",
+//        toBudgetScreen = toBudgetScreen,
+//        toAccessScreen = toAccessScreen,
+//        showNavigationIcon = true,
+//        showBudgetScreen = true,
+//        content = { modifier ->
+//
+//            Column(
+//                modifier = modifier.fillMaxSize()
+//            ) {
+//                Row {
+//                    NumberContainer(
+//                        number = totalSum,
+//                        modifier = Modifier,
+//                        onUncheckAllClick = { onUncheckAllClick() },
+//                        insertBudget = { insertBudget() }
+//                    )
+//                }
+//                // Transaction list content
+//                if (transactions.added.isEmpty()) {
+//                    // Display message if no transactions
+//                    Text("No transactions available", modifier = Modifier.align(Alignment.CenterHorizontally))
+//                } else {
+//                    // Display the list of transactions if they exist
+//                    Row {
+//                        TransactionContent(
+//                            transactions = transactions,
+//                            checkedStates = checkedStates,
+//                            onCheckedChange = onCheckedChange
+//                        )
+//                    }
+//                }
+//                MyBottomAppBar(
+//                    number = totalSum,
+//                    toPlaidLink = { toPlaidLink() }
+//
+//                )
+
+
+//                LazyColumn(
+//                    modifier = Modifier.fillMaxSize(),
+//                    horizontalAlignment = Alignment.Start
+//                ) {
+//                    items(transactions.added) { transaction ->
+//                        val isChecked by rememberUpdatedState(checkedStates[transaction] ?: false)
+//
+//                        CustomListItem(
+//                            headlineContent = {
+//                                Text(
+//                                    text = "${transaction.amount} ${transaction.isoCurrencyCode}",
+//                                    modifier = Modifier.padding(bottom = 4.dp)
+//                                )
+//                            },
+//                            supportingContent = {
+//                                Text(
+//                                    text = transaction.date.toString(),
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    color = MaterialTheme.colorScheme.secondary
+//                                )
+//                            },
+//                            overlineContent = {
+//                                Text(
+//                                    text = transaction.name,
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    color = MaterialTheme.colorScheme.secondary
+//                                )
+//                            },
+//                            checkboxState = isChecked,
+//                            onCheckboxCheckedChange = { checked ->
+//                                onCheckedChange(transaction, checked)
+//                            },
+//                            modifier = Modifier.padding(vertical = 4.dp)
+//                        )
+//                    }
+//                }
+            }
+//        }
+//    )
+//}
 
 @Composable
 fun TransactionContent(
     transactions: TransactionsSyncResponse,
     checkedStates: Map<Transaction, Boolean>,
     onCheckedChange: (Transaction, Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        items(transactions.added) { transaction ->
-            val isChecked by rememberUpdatedState(checkedStates[transaction] ?: false)
+    if (transactions.added.isEmpty()) {
+        // Handle empty state
+        Text(
+            text = "No transactions to display",
+            modifier = modifier
+//                .fillMaxWidth()
+                .padding(16.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+    } else {
 
-            CustomListItem(
-                headlineContent = {
-                    Text(
-                        text = "${transaction.amount} ${transaction.isoCurrencyCode}",
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = transaction.date.toString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                },
-                overlineContent = {
-                    Text(
-                        text = transaction.name,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                },
-                checkboxState = isChecked,
-                onCheckboxCheckedChange = { checked ->
-                    onCheckedChange(transaction, checked)
-                },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+        LazyColumn(
+            modifier = modifier,
+            horizontalAlignment = Alignment.Start
+        ) {
+            items(transactions.added) { transaction ->
+                val isChecked by rememberUpdatedState(checkedStates[transaction] ?: false)
+                Log.d("TransactionContent", "Displaying transaction: ${transaction.name}")
+                CustomListItem(
+                    headlineContent = {
+                        Text(
+                            text = "${transaction.amount} ${transaction.isoCurrencyCode}",
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = transaction.date.toString(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    },
+                    overlineContent = {
+                        Text(
+                            text = transaction.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    },
+                    checkboxState = isChecked,
+                    onCheckboxCheckedChange = { checked ->
+                        onCheckedChange(transaction, checked)
+                    },
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
         }
     }
 }

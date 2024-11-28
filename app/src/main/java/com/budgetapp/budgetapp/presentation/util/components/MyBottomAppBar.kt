@@ -46,41 +46,29 @@ fun MyBottomAppBar(
     number: Double,
     toPlaidLink: () -> Unit,
 ) {
+        BottomAppBar(actions = {
+            Box(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text(
+                    text = "Amount Spent: ${"%.2f".format(number)}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 20.sp,
+                )
+            }
+            // Add other action icons here if needed
+        }, floatingActionButton = {
+            FloatingActionButton(
+                onClick = { toPlaidLink() },
+                containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
+                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+            ) {
+                Icon(Icons.Filled.Add, "Localized description")
+            }
+        })
 
-
-
-    Scaffold(
-        bottomBar = {
-            BottomAppBar(
-                actions = {
-                    Box(
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text(
-                            text = "Amount Spent: ${"%.2f".format(number)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 20.sp,
-                        )
-                    }
-                    // Add other action icons here if needed
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = {toPlaidLink()},
-                        containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                    ) {
-                        Icon(Icons.Filled.Add, "Localized description")
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-    }
 }
-
 
 
 //@Preview(showBackground = true)

@@ -14,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.budgetapp.budgetapp.domain.model.savedbudget.BudgetItem
+import com.budgetapp.budgetapp.presentation.launchwallet_screen.LaunchWalletViewModel
+import com.budgetapp.budgetapp.presentation.util.components.MyBottomAppBar
 
 import com.budgetapp.budgetapp.presentation.util.components.MyTopAppBar
 import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
@@ -28,11 +31,13 @@ import com.budgetapp.budgetapp.presentation.viewmodel.CheckStatesViewModel
 @Composable
 internal fun BudgetScreen(
     navController: NavController,
-    viewModel: BudgetViewModel = hiltViewModel(navController.getBackStackEntry("budgetScreen")),
+    viewModel: BudgetViewModel = hiltViewModel(),
     checkedStatesViewModel: CheckStatesViewModel = hiltViewModel(),
+    launchWalletViewModel: LaunchWalletViewModel = hiltViewModel(navController.getBackStackEntry("launchWallet")),
 ) {
     val viewState by viewModel.budgetState.collectAsStateWithLifecycle()
     val totalSum by checkedStatesViewModel.totalSum.collectAsStateWithLifecycle()
+    val launchWalletViewState by launchWalletViewModel.linkTokenState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getAllBudgetItems()
@@ -44,7 +49,12 @@ internal fun BudgetScreen(
             BudgetContent(
                 modifier = Modifier,
                 toBudgetScreen = {},
-                toAccessScreen = { navController.navigate("accessScreen") },
+                toAccessScreen = {launchWalletViewState.linkToken?.let {
+                    navController.navigate("accessScreen/$it")
+                    Log.d("linkToken", it)
+                }
+
+                                 },
                 budgetItems = budgetItems,
                 deleteBudget = { budgetItem -> viewModel.deleteBudgetItem(budgetItem) }
             )
@@ -67,36 +77,41 @@ fun BudgetContent(
     deleteBudget: (BudgetItem) -> Unit,
 ) {
 
-    MyTopAppBar(
-        title = "Budgetting App",
-        toBudgetScreen = toBudgetScreen,
-        toAccessScreen = toAccessScreen,
-        showNavigationIcon = true,
-        showBudgetScreen = true,
-        content = { modifier ->
+    Scaffold (
+        topBar = {
+            MyTopAppBar(
+                title = "Budgetting App",
+                toBudgetScreen = { toBudgetScreen() },
+                toAccessScreen = { toAccessScreen() },
+                showNavigationIcon = true,
+                showBudgetScreen = false,
+            )
+        },
 
-            Column(
-                modifier = modifier.fillMaxSize()
-            ) {
-                budgetItems.forEach { budgetItem ->
-                    ListItem(
-                        headlineContent = {
-                            Text(text = "${budgetItem.amount}")
-                        },
-                        supportingContent = { Text(text = "${budgetItem.date.toString()}") },
-                        trailingContent = {
-                            Button(onClick = {
-                                deleteBudget(budgetItem)
-                                Log.d("db", "deleted")
-                            }) {
-                                Text(text = "delete")
+        content = { innerPadding ->
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    budgetItems.forEach { budgetItem ->
+                        ListItem(
+                            headlineContent = {
+                                Text(text = "${budgetItem.amount}")
+                            },
+                            supportingContent = { Text(text = "${budgetItem.date.toString()}") },
+                            trailingContent = {
+                                Button(onClick = {
+                                    deleteBudget(budgetItem)
+                                    Log.d("db", "deleted")
+                                }) {
+                                    Text(text = "delete")
+                                }
                             }
-                        }
 
-                    )
+                        )
+                    }
                 }
-            }
-
         }
     )
 }

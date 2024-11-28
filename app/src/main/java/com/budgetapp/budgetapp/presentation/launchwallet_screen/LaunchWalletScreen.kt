@@ -57,17 +57,18 @@ internal fun LaunchWalletScreen(
 
     // Once the link token is available, navigate to AccessScreen
     LaunchedEffect(viewState.linkToken) {
-        viewState.linkToken?.let {
+        viewState.linkToken?.let { linkToken ->
             // Passing the linkToken as an argument to AccessScreen
-            navController.navigate("accessScreen/$it")
+            navController.navigate("accessScreen/$linkToken")
         }
     }
 
     LaunchWalletContent(
         viewState = viewState,
         toBudgetScreen = { navController.navigate("budgetScreen") },
-        toAccessScreen = { navController.navigate("accessScreen") },
+        toAccessScreen = { navController.navigate("accessScreen/${viewState.linkToken}") },
         toGoogleSignIn = { viewModel.getCredential(activity) },
+        modifier = Modifier.fillMaxSize()
     )
 }
 
@@ -77,18 +78,25 @@ fun LaunchWalletContent(
     toBudgetScreen: () -> Unit,
     toAccessScreen: () -> Unit,
     toGoogleSignIn: () -> Unit,
+    modifier: Modifier
 ) {
 
-    MyTopAppBar(
-        title = "Budgeting App",
-        toBudgetScreen = toBudgetScreen,
-        toAccessScreen = toAccessScreen,
-        showNavigationIcon = false,
-        showBudgetScreen = false,
-        content = { modifier ->
+    Scaffold(
+        topBar = {
+            MyTopAppBar(
+                title = "Budgeting App",
+                toBudgetScreen = toBudgetScreen,
+                toAccessScreen = toAccessScreen,
+                showNavigationIcon = false,
+                showBudgetScreen = false,
+            )
+        },
+        content = { innerPadding ->
 
             Column(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -103,7 +111,10 @@ fun LaunchWalletContent(
                     ) {
                         Text(viewState.buttonText)
                     }
-
+                }
+            }
+        }
+                    )
 
 
 
@@ -119,8 +130,4 @@ fun LaunchWalletContent(
 //                }
 //            }
 
-                }
-            }
-        }
-    )
 }

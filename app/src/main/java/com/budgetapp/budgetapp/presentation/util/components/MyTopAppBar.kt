@@ -34,72 +34,43 @@ fun MyTopAppBar(
     toAccessScreen:() -> Unit,
     showNavigationIcon: Boolean,
     showBudgetScreen: Boolean,
-    content: @Composable (Modifier) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(
-                        "Budget App",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    if (showNavigationIcon) {
-                        IconButton(onClick = { toAccessScreen() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { toBudgetScreen}) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
+    CenterAlignedTopAppBar(
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.primary
+        ),
+        title = {
+            Text(
+                title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
-    ) { innerPadding ->
-        content(Modifier.padding(innerPadding))
-    }
-//    TopAppBar(
-//        title = { Text(text = title) },
-//
-//        navigationIcon = {
-//            if(showNavigationIcon) {
-//            Button(onClick = { toAccessScreen()}) {
-//                Icon(
-//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                    contentDescription = "Go back"
-//                )
-//            }}},
-//        actions = {
-//            if(showBudgetScreen){
-//            Button(onClick = {toBudgetScreen()}) {
-//                Icon(imageVector = Icons.Filled.Menu, contentDescription = "Budget")
-//            }
-//            }},
-//        modifier = Modifier
-//            .shadow(5.dp),
-//
-//    )
-
+        navigationIcon = {
+            if (showNavigationIcon) {
+                IconButton(onClick = { toAccessScreen() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Localized description"
+                    )
+                }
+            }
+        },
+        actions = {
+            if (showBudgetScreen) {
+                IconButton(onClick = { toBudgetScreen() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Localized description"
+                    )
+                }
+            }
+        },
+        scrollBehavior = scrollBehavior
+    )
 }
 
 //@Composable
