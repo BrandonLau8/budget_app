@@ -4,5 +4,6 @@
 <!--        <domain includeSubdomains="true">192.168.1.23</domain>-->
         <domain includeSubdomains="true">173.52.45.250</domain>
 <!--        <domain includeSubdomains="true">192.168.1.32</domain>-->
+        <domain includeSubdomains="true">budgetting-api-56751984313.us-east4.run.app</domain>
     </domain-config>
 </network-security-config>
